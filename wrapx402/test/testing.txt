@@ -1,0 +1,101 @@
+# Avalanche Wrap-x402 Testing Guide
+
+## Current Deployment (Task 1 Tested and Working)
+
+### Network Information
+- Subnet A RPC: http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc
+- Subnet B RPC: http://127.0.0.1:9650/ext/bc/2kMVkxA8ZjMScLH8bUUjKUW1of4xN7dqZ1vYQHEJc5kB6xErhK/rpc
+- Subnet B Blockchain ID (CB58): 2kMVkxA8ZjMScLH8bUUjKUW1of4xN7dqZ1vYQHEJc5kB6xErhK
+- Subnet B Blockchain ID (Hex): 0xe6229f117d34bc4848085d85f8b4a171eeae963ec9eaf7505df48e215b503519
+
+### Deployed Contracts
+- WarpReceiver (Subnet B): 0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+- WarpSender (Subnet A): 0x95CA0a568236fC7413Cd2b794A7da24422c2BBb6
+- Private Key: 0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027
+
+## Quick Test Commands
+
+### 1. Send Payment
+```bash
+PAYMENT_ID=$(cast keccak "test-payment-$(date +%s)")
+cast send 0x95CA0a568236fC7413Cd2b794A7da24422c2BBb6 "sendPayment(bytes32)" $PAYMENT_ID \
+  --value 1000000000000000000 \
+  --private-key 0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027 \
+  --rpc-url http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc
+```
+
+### 2. Wait for ICM Relayer
+```bash
+sleep 10
+```
+
+### 3. Verify Payment
+```bash
+cast call 0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e "hasPaid(bytes32)(bool)" $PAYMENT_ID \
+  --rpc-url http://127.0.0.1:9650/ext/bc/2kMVkxA8ZjMScLH8bUUjKUW1of4xN7dqZ1vYQHEJc5kB6xErhK/rpc
+```
+
+### 4. Get Payment Receipt
+```bash
+cast call 0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e \
+  "getReceipt(bytes32)((bytes32,uint256,address,uint256,bool))" $PAYMENT_ID \
+  --rpc-url http://127.0.0.1:9650/ext/bc/2kMVkxA8ZjMScLH8bUUjKUW1of4xN7dqZ1vYQHEJc5kB6xErhK/rpc
+```
+
+### 5. Consume Payment
+```bash
+cast send 0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e "consumePayment(bytes32)" $PAYMENT_ID \
+  --private-key 0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027 \
+  --rpc-url http://127.0.0.1:9650/ext/bc/2kMVkxA8ZjMScLH8bUUjKUW1of4xN7dqZ1vYQHEJc5kB6xErhK/rpc
+```
+
+### 6. Set Required Payment Amount
+```bash
+cast send 0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e \
+  "setRequiredPaymentAmount(uint256)" 2000000000000000000 \
+  --private-key 0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027 \
+  --rpc-url http://127.0.0.1:9650/ext/bc/2kMVkxA8ZjMScLH8bUUjKUW1of4xN7dqZ1vYQHEJc5kB6xErhK/rpc
+```
+
+## Deployment Commands
+
+### Deploy Contracts
+```bash
+# Deploy WarpReceiver
+cd /home/madtitan/wrap-x402/wrapx402
+PRIVATE_KEY=0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027 \
+forge script script/DeployWarpReceiver.s.sol:DeployWarpReceiver \
+  --rpc-url http://127.0.0.1:9650/ext/bc/2kMVkxA8ZjMScLH8bUUjKUW1of4xN7dqZ1vYQHEJc5kB6xErhK/rpc \
+  --broadcast
+
+# Deploy WarpSender
+PRIVATE_KEY=0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027 \
+forge script script/DeployWarpSender.s.sol:DeployWarpSender \
+  --rpc-url http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc \
+  --broadcast
+
+# Configure Sender
+PRIVATE_KEY=0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027 \
+SENDER_ADDRESS=0x95CA0a568236fC7413Cd2b794A7da24422c2BBb6 \
+RECEIVER_ADDRESS=0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e \
+REMOTE_BLOCKCHAIN_ID=0xe6229f117d34bc4848085d85f8b4a171eeae963ec9eaf7505df48e215b503519 \
+forge script script/ConfigureSender.s.sol:ConfigureSender \
+  --rpc-url http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc \
+  --broadcast
+```
+
+## Test Results Summary
+
+✅ All Task 1 features tested and working:
+- Payment sending with sendPayment()
+- Payment verification with hasPaid()
+- Receipt retrieval with getReceipt()
+- Payment consumption with consumePayment()
+- Double-consumption prevention
+- Required payment amount validation
+- Duplicate payment ID prevention
+- Cross-chain message delivery via Teleporter
+
+
+
+

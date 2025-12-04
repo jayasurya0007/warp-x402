@@ -10,6 +10,24 @@ contract WarpSender {
     bytes32 public remoteBlockchainId;
     address public remoteReceiver;
 
+    // Payment receipt structure
+    struct PaymentReceipt {
+        bytes32 paymentId;
+        uint256 amount;
+        address payer;
+        uint256 timestamp;
+        bool consumed;
+    }
+
+    // Events
+    event PaymentSent(
+        bytes32 indexed paymentId,
+        address indexed payer,
+        uint256 amount,
+        bytes32 destinationChainId,
+        address destinationReceiver
+    );
+
     constructor(address _messenger) {
         MESSENGER = ITeleporterMessenger(_messenger);
     }
@@ -38,6 +56,43 @@ contract WarpSender {
         });
 
         MESSENGER.sendCrossChainMessage(input);
+    }
+
+    // Sends payment receipt to remote subnet
+    function sendPayment(bytes32 paymentId) external payable {
+        require(remoteReceiver != address(0), "Receiver not set");
+        require(remoteBlockchainId != bytes32(0), "Remote Chain ID not set");
+        require(msg.value > 0, "Payment amount must be greater than 0");
+        require(paymentId != bytes32(0), "Payment ID cannot be empty");
+
+        // Create payment receipt
+        PaymentReceipt memory receipt = PaymentReceipt({
+            paymentId: paymentId,
+            amount: msg.value,
+            payer: msg.sender,
+            timestamp: block.timestamp,
+            consumed: false
+        });
+
+        // Encode payment receipt
+        bytes memory encodedReceipt = abi.encode(receipt);
+
+        ITeleporterMessenger.TeleporterMessageInput memory input = ITeleporterMessenger.TeleporterMessageInput({
+            destinationBlockchainID: remoteBlockchainId,
+            destinationAddress: remoteReceiver,
+            feeInfo: ITeleporterMessenger.TeleporterFeeInfo({
+                feeTokenAddress: address(0),
+                amount: 0
+            }),
+            requiredGasLimit: 200000, // Higher gas limit for payment processing
+            allowedRelayerAddresses: new address[](0),
+            message: encodedReceipt
+        });
+
+        MESSENGER.sendCrossChainMessage(input);
+
+        // Emit payment sent event
+        emit PaymentSent(paymentId, msg.sender, msg.value, remoteBlockchainId, remoteReceiver);
     }
 }
 

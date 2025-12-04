@@ -1,3 +1,4 @@
+on any changes in the codebase , change it in the document.md also ( mainly any newly used commands)
 # Avalanche Cross-Subnet Messaging: Complete Guide
 
 This document provides a comprehensive step-by-step guide to creating Avalanche subnets and deploying cross-chain messaging contracts using Teleporter (ICM).
@@ -561,6 +562,190 @@ cast receipt <TX_HASH> \
 
 ---
 
+## Payment System (HTTP 402 Implementation)
+
+### Overview
+
+The payment system implements HTTP 402 "Payment Required" functionality using cross-chain payment receipts. This allows resources on one chain to require payment verification from another chain.
+
+### Payment Receipt Structure
+
+```solidity
+struct PaymentReceipt {
+    bytes32 paymentId;   // Unique payment identifier
+    uint256 amount;      // Payment amount in wei
+    address payer;       // Address that made the payment
+    uint256 timestamp;   // When payment was made
+    bool consumed;       // Whether payment has been used
+}
+```
+
+### Step 1: Send Payment
+
+Use the `SendPayment.s.sol` script or send directly:
+
+**Using Script:**
+
+```bash
+# Set environment variables
+export SENDER_ADDRESS=0x7B4982e1F7ee384F206417Fb851a1EB143c513F9
+export PRIVATE_KEY=0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027
+
+# Run payment script
+PRIVATE_KEY=$PRIVATE_KEY \
+SENDER_ADDRESS=$SENDER_ADDRESS \
+forge script script/SendPayment.s.sol:SendPayment \
+  --rpc-url http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc \
+  --broadcast
+```
+
+**Using cast (direct):**
+
+```bash
+# Generate payment ID (in production, this comes from 402 response)
+PAYMENT_ID=$(cast keccak "test-payment-$(date +%s)")
+
+# Send payment (1 token = 1e18 wei)
+cast send $SENDER_ADDRESS \
+  "sendPayment(bytes32)" $PAYMENT_ID \
+  --value 1000000000000000000 \
+  --private-key $PRIVATE_KEY \
+  --rpc-url http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc
+```
+
+The `sendPayment` function:
+- Accepts payment ID as parameter
+- Receives payment amount via `msg.value`
+- Creates and sends `PaymentReceipt` to remote chain
+- Emits `PaymentSent` event
+
+### Step 2: Verify Payment
+
+Wait 5-10 seconds for ICM relayer to deliver payment receipt, then verify:
+
+**Using Script:**
+
+```bash
+export RECEIVER_ADDRESS=0xA4cD3b0Eb6E5Ab5d8CE4065BcCD70040ADAB1F00
+export PAYMENT_ID=0x1234... # Use actual payment ID from Step 1
+
+# Wait for delivery
+sleep 10
+
+# Verify payment
+RECEIVER_ADDRESS=$RECEIVER_ADDRESS \
+PAYMENT_ID=$PAYMENT_ID \
+forge script script/VerifyPayment.s.sol:VerifyPayment \
+  --rpc-url http://127.0.0.1:9652/ext/bc/2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k/rpc
+```
+
+**Using cast (direct):**
+
+```bash
+# Check if payment exists
+cast call $RECEIVER_ADDRESS \
+  "hasPaid(bytes32)(bool)" $PAYMENT_ID \
+  --rpc-url http://127.0.0.1:9652/ext/bc/2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k/rpc
+
+# Get payment details
+cast call $RECEIVER_ADDRESS \
+  "getReceipt(bytes32)((bytes32,uint256,address,uint256,bool))" $PAYMENT_ID \
+  --rpc-url http://127.0.0.1:9652/ext/bc/2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k/rpc
+
+# Check if consumed
+cast call $RECEIVER_ADDRESS \
+  "isConsumed(bytes32)(bool)" $PAYMENT_ID \
+  --rpc-url http://127.0.0.1:9652/ext/bc/2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k/rpc
+```
+
+### Step 3: Consume Payment
+
+Mark payment as used to prevent replay attacks:
+
+```bash
+cast send $RECEIVER_ADDRESS \
+  "consumePayment(bytes32)" $PAYMENT_ID \
+  --private-key $PRIVATE_KEY \
+  --rpc-url http://127.0.0.1:9652/ext/bc/2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k/rpc
+```
+
+### Step 4: Configure Payment Requirements
+
+Set minimum payment amount on receiver:
+
+```bash
+# Set required payment to 1 token (1e18 wei)
+cast send $RECEIVER_ADDRESS \
+  "setRequiredPaymentAmount(uint256)" 1000000000000000000 \
+  --private-key $PRIVATE_KEY \
+  --rpc-url http://127.0.0.1:9652/ext/bc/2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k/rpc
+
+# Verify configuration
+cast call $RECEIVER_ADDRESS \
+  "requiredPaymentAmount()(uint256)" \
+  --rpc-url http://127.0.0.1:9652/ext/bc/2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k/rpc
+```
+
+### Payment Flow Diagram
+
+```
+┌─────────────┐                    ┌─────────────┐
+│   Client    │                    │   Server    │
+└──────┬──────┘                    └──────┬──────┘
+       │                                  │
+       │  1. GET /resource                │
+       │─────────────────────────────────>│
+       │                                  │
+       │  2. 402 Payment Required         │
+       │  {paymentId, amount, sender}     │
+       │<─────────────────────────────────│
+       │                                  │
+┌──────▼──────┐                    ┌──────┴──────┐
+│ WarpSender  │   3. sendPayment   │ WarpReceiver│
+│  (Chain A)  │═══════════════════>│  (Chain B)  │
+└─────────────┘    ICM Relayer     └─────────────┘
+       │                                  │
+       │  4. Wait 5-10 seconds            │
+       │                                  │
+       │  5. GET /resource                │
+       │─────────────────────────────────>│
+       │                                  │
+       │     6. hasPaid(paymentId)        │
+       │     ◄──────────────────────────┐ │
+       │                                │ │
+       │     7. 200 OK + Resource       │ │
+       │<─────────────────────────────────│
+       │                                  │
+       │     8. consumePayment()          │
+       │     ────────────────────────────>│
+```
+
+### Key Functions
+
+#### WarpSender.sol
+
+- `sendPayment(bytes32 paymentId) payable`: Send payment receipt to remote chain
+- `setRemoteReceiver(bytes32 chainId, address receiver)`: Configure destination
+
+#### WarpReceiver.sol
+
+- `hasPaid(bytes32 paymentId) returns (bool)`: Check if payment exists
+- `getReceipt(bytes32 paymentId) returns (PaymentReceipt)`: Get payment details
+- `isConsumed(bytes32 paymentId) returns (bool)`: Check if payment was used
+- `consumePayment(bytes32 paymentId)`: Mark payment as consumed
+- `setRequiredPaymentAmount(uint256 amount)`: Set minimum payment
+- `setApprovedSender(bytes32 chainId, address sender)`: Configure authorized sender
+
+### Security Features
+
+1. **onlyTeleporter Modifier**: Ensures only Teleporter Messenger can deliver messages
+2. **Approved Sender Validation**: Verifies origin chain and sender address
+3. **Duplicate Prevention**: Rejects duplicate payment IDs
+4. **Amount Validation**: Enforces minimum payment requirements
+5. **Consumption Tracking**: Prevents payment replay attacks
+
+---
+
 ## Architecture & Technical Details
 
 ### Network Architecture
@@ -768,6 +953,13 @@ cast call <address> <signature> --rpc-url <url>
 cast code <address> --rpc-url <url>
 cast chain-id --rpc-url <url>
 
+# Payment Commands
+cast send $SENDER_ADDRESS "sendPayment(bytes32)" <payment_id> --value <amount> --private-key <key> --rpc-url <url>
+cast call $RECEIVER_ADDRESS "hasPaid(bytes32)(bool)" <payment_id> --rpc-url <url>
+cast call $RECEIVER_ADDRESS "getReceipt(bytes32)((bytes32,uint256,address,uint256,bool))" <payment_id> --rpc-url <url>
+cast send $RECEIVER_ADDRESS "consumePayment(bytes32)" <payment_id> --private-key <key> --rpc-url <url>
+cast send $RECEIVER_ADDRESS "setRequiredPaymentAmount(uint256)" <amount> --private-key <key> --rpc-url <url>
+
 # Blockchain Queries
 curl -X POST --data '{"jsonrpc":"2.0","id":1,"method":"platform.getBlockchains","params":{}}' \
   -H 'content-type:application/json;' http://127.0.0.1:9650/ext/bc/P
@@ -798,17 +990,21 @@ ps aux | grep icm-relayer
 
 ## Conclusion
 
-You now have a complete working cross-subnet messaging system on Avalanche! The system demonstrates:
+You now have a complete working cross-subnet messaging and payment system on Avalanche! The system demonstrates:
 
 ✅ Subnet creation and deployment  
 ✅ Teleporter/ICM integration  
 ✅ Cross-chain message sending  
+✅ Cross-chain payment receipts (HTTP 402)
+✅ Payment verification and consumption
 ✅ Automated message relaying  
 ✅ Message delivery verification  
+✅ Security validation and authentication
 
 **Next Steps:**
-- Add authentication to receiver
-- Implement fee mechanisms
-- Handle message failures
+- Build HTTP 402 server implementation
+- Implement fee mechanisms for relayers
+- Handle message failures and retries
 - Deploy to Fuji testnet
+- Create demo UI/CLI
 - Prepare for mainnet deployment
