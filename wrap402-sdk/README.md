@@ -18,27 +18,29 @@ npm install avax-warp-pay
 ```typescript
 import { Warp402, PRESETS } from 'avax-warp-pay';
 
-// Use pre-deployed contracts on Fuji testnet - NO DEPLOYMENT NEEDED!
+// ⚠️ IMPORTANT: PRESETS.fuji is same-chain, won't work for real cross-chain!
+// Use PRESETS.local with your deployed contracts instead
 const warp = new Warp402({
-  ...PRESETS.fuji,
-  privateKey: process.env.PRIVATE_KEY  // Your Fuji testnet private key
+  ...PRESETS.local,  // Must have contracts on DIFFERENT chains
+  privateKey: process.env.PRIVATE_KEY
 });
 
-// Send cross-chain payment (requires testnet AVAX for gas)
+// Send cross-chain payment (requires AVAX for gas on BOTH chains)
 const paymentId = await warp.pay(ethers.parseEther("0.1"));
 console.log("✅ Payment sent:", paymentId);
 
-// Wait for Teleporter relay (~30 seconds on Fuji)
+// Wait for Teleporter relay (~15-30 seconds)
 await new Promise(r => setTimeout(r, 30000));
 
-// Verify on destination chain
+// Verify on destination chain (different blockchain)
 const verified = await warp.verify(paymentId);
 console.log("✅ Verified:", verified);
 ```
 
-**That's it!** Using real contracts on Avalanche Fuji testnet.
+**Requirements:** Contracts must be on **different blockchains** for Warp to work.
 
 > 💰 **Get testnet AVAX**: https://faucet.avax.network/
+> 📘 **Deploy Guide**: See [Deploying Your Own Contracts](#deploying-your-own-contracts)
 
 ---
 
@@ -86,11 +88,19 @@ Use PRESETS.local   Use PRESETS.fuji
 
 ---
 
-## 📦 Pre-Deployed Contracts - Ready to Use!
+## 📦 Pre-Deployed Contracts - Reference Only!
 
-### Fuji Testnet Contracts (For SDK Testing)
+### ⚠️ Critical: Warp Messaging Requirements
 
-Test contracts deployed on Avalanche Fuji C-Chain:
+**Avalanche Warp Messaging (AWM) / Teleporter requires:**
+- ✅ Contracts on **DIFFERENT blockchains** (different blockchain IDs)
+- ✅ Each chain must have Teleporter messenger deployed
+- ✅ Cross-chain relayers to pass messages between chains
+- ❌ **Does NOT work on same chain** - violates Warp design
+
+### Fuji Testnet Contracts (Reference Implementation)
+
+Contracts deployed on Avalanche Fuji C-Chain:
 
 | Contract | Address |
 |----------|---------|
@@ -100,20 +110,28 @@ Test contracts deployed on Avalanche Fuji C-Chain:
 **Network:** Fuji C-Chain (43113)  
 **Verify:** [Snowtrace](https://testnet.snowtrace.io)
 
-### Quick Start
+⚠️ **Note:** Both contracts on same chain = **NOT functional for cross-chain messaging**
+
+### ⚠️ PRESETS.fuji Does NOT Work for Cross-Chain
 
 ```typescript
 import { Warp402, PRESETS } from 'avax-warp-pay';
 
+// ❌ This will NOT work - both contracts on same chain!
+// Warp Messaging requires different blockchain IDs
 const warp = new Warp402({
-  ...PRESETS.fuji,
+  ...PRESETS.fuji,  // Both on Fuji C-Chain - won't relay messages
   privateKey: process.env.PRIVATE_KEY
 });
 
+// This call will succeed on sender chain but message won't relay
 const paymentId = await warp.pay(ethers.parseEther("0.1"));
-await new Promise(r => setTimeout(r, 30000));
-const verified = await warp.verify(paymentId);
+
+// This will return false - receiver never gets the message
+const verified = await warp.verify(paymentId);  // false
 ```
+
+**Why it fails:** Teleporter messenger only relays between **different blockchains**, not same-chain.
 
 ### For Local Testing
 
@@ -132,10 +150,11 @@ const warp = new Warp402({
 These pre-deployed Fuji contracts have **two major limitations**:
 
 #### 1️⃣ Same-Chain Only (Not True Cross-Chain)
-- ⚠️ **Both contracts are on Fuji C-Chain** - this is NOT real cross-chain messaging
-- Teleporter/ICM is designed for **different blockchains**, not same-chain
-- This setup is for **API demonstration only**, not production use
-- No cross-chain security validation occurs
+- ⚠️ **Both contracts are on Fuji C-Chain** - this violates Warp Messaging design
+- **Warp Messaging does NOT support same-chain transactions** - it requires different blockchain IDs
+- Teleporter messenger will NOT relay messages on the same chain
+- **This configuration will fail for actual message passing**
+- This is for **contract deployment demonstration only**, not functional cross-chain messaging
 
 #### 2️⃣ Cannot Be Reconfigured
 - ❌ **Fuji → Your Local Subnet:** You can't reconfigure our contracts
@@ -152,17 +171,17 @@ Only the contract owner can establish this connection.
 
 ### 🎯 Use Cases for Pre-Deployed Contracts:
 
-✅ **Learning the SDK** - Understand the API without deployment
-✅ **Testing Integration** - Verify your code works with the SDK
-✅ **Quick Demos** - Show the payment flow concept
+✅ **Learning the SDK API** - Understand method signatures and structure
+✅ **Contract Verification** - See deployed contract addresses on Snowtrace
+✅ **Reference Implementation** - Example of how contracts should be deployed
 
 ❌ **NOT for:**
-- Real cross-chain payments (both contracts are on same chain!)
-- Production applications
-- Cross-subnet messaging
-- Security validation
+- **Functional testing** - Same-chain setup violates Warp design, messages won't relay
+- **Real cross-chain payments** - Warp requires different blockchain IDs
+- **Production applications** - You need different chains
+- **Cross-subnet messaging** - Both on same subnet won't work
 
-> 💡 **Think of it as:** A sandbox to learn the SDK, not a production payment system
+> 💡 **Important:** PRESETS.fuji contracts exist on-chain but **cannot perform cross-chain messaging** because they're on the same blockchain. Warp Messaging requires different blockchains.
 
 ### ⚠️ Production Note
 
