@@ -1,0 +1,62 @@
+{
+  "name": "avax-warp-pay",
+  "version": "1.0.1",
+  "description": "Cross-chain payment receipt SDK for Avalanche Subnets using Teleporter",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "scripts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js",
+    "prebuild": "node scripts/prebuild.js",
+    "build": "tsc --skipLibCheck",
+    "test": "ts-node test/sdk-test.ts",
+    "test:unit": "ts-node test/sdk-test.ts",
+    "test:errors": "ts-node test/error-handling.ts",
+    "test:local": "ts-node test/integration-local.ts",
+    "test:fuji": "ts-node test/integration-fuji.ts",
+    "test:all": "npm run test:unit && npm run test:errors",
+    "example:local": "ts-node examples/local-demo.ts",
+    "example:fuji": "ts-node examples/fuji-demo.ts",
+    "example:cross": "ts-node examples/cross-subnet-demo.ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "avalanche",
+    "subnet",
+    "teleporter",
+    "cross-chain",
+    "payment",
+    "http402",
+    "warp",
+    "blockchain",
+    "web3",
+    "ethereum",
+    "receipt",
+    "verification"
+  ],
+  "author": "Warp-402 Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jayasurya0007/wrap-x402.git",
+    "directory": "warp402-sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/jayasurya0007/wrap-x402/issues"
+  },
+  "homepage": "https://github.com/jayasurya0007/wrap-x402#readme",
+  "dependencies": {
+    "ethers": "^6.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/ws": "^8.18.1",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}

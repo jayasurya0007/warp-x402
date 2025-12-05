@@ -6,7 +6,7 @@
  */
 
 import express from 'express';
-import { Warp402 } from '../warp402-sdk/dist/index.js';
+import { Warp402 } from 'avax-warp-pay';
 import { ethers } from 'ethers';
 import dotenv from 'dotenv';
 import cors from 'cors';
