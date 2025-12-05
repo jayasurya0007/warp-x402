@@ -44,6 +44,8 @@ console.log("✅ Verified:", verified);
 
 ## 🤔 "Do I Need to Deploy Contracts?" - Decision Tree
 
+> **TL;DR:** For real cross-chain payments, YES - you must deploy BOTH WarpSender and WarpReceiver and configure them to talk to each other.
+
 ```
 ┌─────────────────────────────────────────┐
 │  What are you trying to do?            │
@@ -86,46 +88,31 @@ Use PRESETS.local   Use PRESETS.fuji
 
 ## 📦 Pre-Deployed Contracts - Ready to Use!
 
-### ✅ Fuji Testnet (Public - Free to Use!)
+### Fuji Testnet Contracts (For SDK Testing)
 
-We've deployed **production-ready contracts** on Avalanche Fuji C-Chain for instant testing:
+Test contracts deployed on Avalanche Fuji C-Chain:
 
-| Component | Address | Network | Purpose |
-|-----------|---------|---------|---------|
-| **WarpSender** | `0x0d45537c1DA893148dBB113407698E20CfA2eE56` | Fuji C-Chain | Send payments |
-| **WarpReceiver** | `0x2A3E54D66c78cB58052B8eAb677c973814Bc8A3f` | Fuji C-Chain | Verify receipts |
-| **Teleporter Messenger** | `0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf` | Fuji C-Chain | ICM messaging |
+| Contract | Address |
+|----------|---------|
+| **WarpSender** | `0x0d45537c1DA893148dBB113407698E20CfA2eE56` |
+| **WarpReceiver** | `0x2A3E54D66c78cB58052B8eAb677c973814Bc8A3f` |
 
-**Network Details:**
-- RPC URL: `https://api.avax-test.network/ext/bc/C/rpc`
-- Chain ID: `43113`
-- Blockchain ID: `0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5`
+**Network:** Fuji C-Chain (43113)  
+**Verify:** [Snowtrace](https://testnet.snowtrace.io)
 
-**Verify on Snowtrace:**
-- 🔍 [WarpSender](https://testnet.snowtrace.io/address/0x0d45537c1DA893148dBB113407698E20CfA2eE56)
-- 🔍 [WarpReceiver](https://testnet.snowtrace.io/address/0x2A3E54D66c78cB58052B8eAb677c973814Bc8A3f)
-
-### 🚀 Quick Start with Fuji
+### Quick Start
 
 ```typescript
 import { Warp402, PRESETS } from 'avax-warp-pay';
 
-// Use pre-deployed contracts on Fuji - ZERO deployment needed!
 const warp = new Warp402({
   ...PRESETS.fuji,
   privateKey: process.env.PRIVATE_KEY
 });
 
-// Send cross-chain payment (costs ~0.002 AVAX gas)
 const paymentId = await warp.pay(ethers.parseEther("0.1"));
-console.log("✅ Payment sent:", paymentId);
-
-// Wait for Teleporter relay (~30 seconds on Fuji)
 await new Promise(r => setTimeout(r, 30000));
-
-// Verify on destination
 const verified = await warp.verify(paymentId);
-console.log("✅ Verified:", verified);
 ```
 
 ### For Local Testing
@@ -140,13 +127,51 @@ const warp = new Warp402({
 });
 ```
 
+### ⚠️ Critical Limitations
+
+These pre-deployed Fuji contracts have **two major limitations**:
+
+#### 1️⃣ Same-Chain Only (Not True Cross-Chain)
+- ⚠️ **Both contracts are on Fuji C-Chain** - this is NOT real cross-chain messaging
+- Teleporter/ICM is designed for **different blockchains**, not same-chain
+- This setup is for **API demonstration only**, not production use
+- No cross-chain security validation occurs
+
+#### 2️⃣ Cannot Be Reconfigured
+- ❌ **Fuji → Your Local Subnet:** You can't reconfigure our contracts
+- ❌ **Your Subnet → Fuji:** Our receiver won't accept your sender
+- **Why?** Only the contract owner can call `setRemoteReceiver()` and `setApprovedSender()`
+- You don't own these contracts → You can't change their configuration
+
+**For real cross-chain payments, you must:**
+1. ✅ Deploy WarpSender on Chain A
+2. ✅ Deploy WarpReceiver on Chain B  
+3. ✅ Configure them to talk to each other (the "handshake")
+
+Only the contract owner can establish this connection.
+
+### 🎯 Use Cases for Pre-Deployed Contracts:
+
+✅ **Learning the SDK** - Understand the API without deployment
+✅ **Testing Integration** - Verify your code works with the SDK
+✅ **Quick Demos** - Show the payment flow concept
+
+❌ **NOT for:**
+- Real cross-chain payments (both contracts are on same chain!)
+- Production applications
+- Cross-subnet messaging
+- Security validation
+
+> 💡 **Think of it as:** A sandbox to learn the SDK, not a production payment system
+
 ### ⚠️ Production Note
 
-These Fuji contracts are **fully functional and free to use** for testing. For production mainnet deployments, you should deploy your own contracts for full control.
+For **real cross-chain payments** between different subnets, you **must deploy your own contracts** so you can configure them to talk to each other.
 
 ### Want to Deploy Your Own?
 
 See our [Deployment Guide](#deploying-your-own-contracts) below if you need:
+- **Real cross-chain payments** (Subnet A → Subnet B)
 - Custom configuration (gas limits, expiry times)
 - Private subnet deployment
 - Mainnet deployment
@@ -154,21 +179,13 @@ See our [Deployment Guide](#deploying-your-own-contracts) below if you need:
 
 ---
 
-## 🎯 What is avax-warp-pay?
+## What is avax-warp-pay?
 
-This SDK enables **true cross-chain payment receipts**:
+A TypeScript SDK for cross-chain payment receipts using Avalanche Teleporter.
 
-- 💳 **Pay on Chain A** → Verify on Chain B
-- 🔒 **Secure**: Production-grade contracts with access control, reentrancy guards, payment expiry
-- ⚡ **Fast**: Powered by Avalanche Teleporter (10-30 second finality)
-- 🛠️ **Developer-Friendly**: Simple TypeScript API
-- ✅ **Production-Ready**: 60/60 tests passing, comprehensive error handling
-
-### Use Cases
-- **HTTP 402 Paywalls**: Pay on one chain, access content on another
-- **Cross-Chain DeFi**: Pay on mainnet, access services on L2
-- **Gaming**: Buy on one subnet, use items in games on another subnet
-- **Enterprise**: Private subnet payments, public subnet verification
+- Pay on Chain A → Verify on Chain B
+- Powered by Avalanche Interchain Messaging (ICM)
+- Simple TypeScript API
 
 ---
 
@@ -195,41 +212,25 @@ npm install avax-warp-pay ethers@^6
 
 ---
 
-## ⚠️ Prerequisites
+## Prerequisites
 
-> **👤 SDK User? Start Here!**
-> 
-> You **don't need to deploy contracts yourself** if:
-> - ✅ You're just testing (use `PRESETS.local`)
-> - ✅ Your platform has contracts deployed (they'll give you addresses)
-> 
-> You **only need to deploy** if:
-> - ❌ You want production control
-> - ❌ No one else has deployed for your network
->
-> **tl;dr: Most SDK users just need contract addresses, not deployment!**
-
----
+> **🔑 Key Concept:** For real cross-chain payments, you must deploy BOTH contracts (WarpSender + WarpReceiver) and configure them to talk to each other. This "handshake" can only be done by the contract owner.
 
 You have **3 options** to use this SDK:
 
-### Option 1: Use Pre-Deployed Test Contracts (Testing Only)
+### Option 1: Use Pre-Deployed Test Contracts
 
-✅ **Zero setup!** Use our pre-deployed contracts on local networks:
+Use our test contracts on Fuji or local networks:
 
 ```typescript
 import { PRESETS } from 'avax-warp-pay';
 const warp = new Warp402({
-  ...PRESETS.local,
+  ...PRESETS.fuji,
   privateKey: process.env.PRIVATE_KEY
 });
 ```
 
-⚠️ **Note**: These contracts are **placeholders for testing only**. Real Fuji/mainnet deployments require your own contracts or platform-provided addresses.
-
----
-
-### Option 2: Use Platform-Provided Contracts (If Available)
+### Option 2: Use Platform-Provided Contracts
 
 If you're building on a **platform that has already deployed Warp-402 contracts**, they will provide you with:
 
@@ -264,12 +265,33 @@ const warp = new Warp402({
 
 ### Option 3: Deploy Your Own Contracts (Production)
 
-For **full control and production use**, deploy your own contracts:
+For **real cross-chain payments**, you must deploy and configure BOTH contracts:
+
+**The Cross-Chain Handshake (Required!):**
+```
+Chain A                          Chain B
+┌──────────────┐                ┌──────────────┐
+│ WarpSender   │──────────────> │ WarpReceiver │
+│              │  1. setRemote  │              │
+└──────────────┘     Receiver   └──────────────┘
+        ↑                                │
+        │         2. setApproved         │
+        └────────────  Sender  ──────────┘
+```
+
+**Steps:**
+1. ✅ Deploy WarpSender on Chain A
+2. ✅ Deploy WarpReceiver on Chain B
+3. ✅ Configure WarpSender → knows where to send (Chain B address)
+4. ✅ Configure WarpReceiver → trusts sender (Chain A address)
+
+**Without this handshake, cross-chain payments will NOT work!**
 
 **What you need:**
 1. ✅ Foundry installed (`curl -L https://foundry.paradigm.xyz | bash`)
-2. ✅ Funded wallet with AVAX (~0.05 AVAX for deployment)
-3. ✅ RPC URLs for your target chains
+2. ✅ Funded wallet with AVAX on BOTH chains (~0.05 AVAX total)
+3. ✅ RPC URLs for BOTH target chains
+4. ✅ Blockchain IDs for BOTH chains
 
 **Quick deploy:**
 ```bash
@@ -332,14 +354,12 @@ const warp = new Warp402({
 
 ---
 
-### 🤔 Which Option Should I Use?
+### Which Option Should I Use?
 
-| Scenario | Recommended Option |
-|----------|-------------------|
-| **Just testing the SDK** | Option 1: Use PRESETS.local |
-| **Building on a platform with Warp-402** | Option 2: Use platform-provided addresses |
-| **Production app / Full control needed** | Option 3: Deploy your own contracts |
-| **Testing on Fuji testnet** | Option 3: Deploy your own (no public Fuji contracts yet) |
+| Scenario | Option | Deployment Required? |
+|----------|--------|---------------------|
+| **Testing SDK API** | PRESETS.fuji or PRESETS.local | ❌ No |
+| **Real Cross-Chain Payments** | Deploy your own contracts | ✅ Yes - BOTH contracts |
 
 ---
 
@@ -975,9 +995,14 @@ You need AVAX for gas. Get testnet AVAX from:
 
 **A: It depends on your use case:**
 
-- ✅ **Testing locally**: Use `PRESETS.local` (no deployment needed)
+- ✅ **Testing SDK API**: Use `PRESETS.local` or `PRESETS.fuji` (no deployment needed)
 - ✅ **Building on a platform**: Platform provides contract addresses
-- ❌ **Production on Fuji/Mainnet**: You must deploy your own contracts
+- ❌ **Real cross-chain payments**: You MUST deploy BOTH contracts
+
+**Important:** Cross-chain messaging requires a "handshake" between contracts:
+- WarpSender must know WarpReceiver's address
+- WarpReceiver must trust WarpSender's address
+- Only the contract owner can establish this connection
 
 ```typescript
 // Testing - no deployment needed
@@ -991,6 +1016,27 @@ const warp = new Warp402({
   receiverChain: { /* ... */ receiver: '0xYOUR_DEPLOYED_RECEIVER' }
 });
 ```
+
+### Q: What is the "handshake" and why is it required?
+
+**A: The handshake is the configuration that connects contracts on different chains:**
+
+```solidity
+// Without handshake:
+WarpSender (Chain A)  ❌  WarpReceiver (Chain B)
+   ↓ Message rejected - no configuration
+
+// With handshake:
+WarpSender (Chain A)  ✅  WarpReceiver (Chain B)
+   ↓ Message accepted - contracts trust each other
+```
+
+**Why it's needed:**
+- ❌ Without it: WarpSender doesn't know where to send
+- ❌ Without it: WarpReceiver rejects all messages
+- ✅ With it: Secure cross-chain communication works
+
+**Who can do it:** Only the contract owner (deployer)
 
 ### Q: Where do I get contract addresses for Fuji/Mainnet?
 
@@ -1033,60 +1079,91 @@ If not documented, ask in their Discord/support.
 - Teleporter relayer speed
 - Number of validator signatures required
 
+### Q: What is the "handshake" and why is it critical?
+
+**A: The handshake is the configuration that connects contracts on different chains:**
+
+```solidity
+// Step 3: Configure WarpSender to know where to send
+await senderContract.setRemoteReceiver(
+  chainB_blockchainId,  // Destination chain
+  receiverAddress       // Receiver contract address
+);
+
+// Step 4: Configure WarpReceiver to trust sender
+await receiverContract.setApprovedSender(
+  chainA_blockchainId,  // Source chain
+  senderAddress         // Sender contract address
+);
+```
+
+**Without this handshake:**
+- ❌ WarpSender doesn't know where to send messages
+- ❌ WarpReceiver rejects all incoming messages  
+- ❌ Cross-chain payments fail completely
+
+**Only the contract owner can perform this handshake!** This is why you can't use someone else's contracts for your own cross-chain setup.
+
 ### Q: Can I use someone else's deployed contracts?
 
-**A: YES!** As long as you have:
-- ✅ Contract addresses (sender + receiver)
-- ✅ RPC URLs for both chains
-- ✅ Blockchain IDs (hex format)
+**A: YES, but with a critical limitation!**
 
-Just configure the SDK with those addresses:
+✅ **You CAN:**
+- Use the contract addresses in your SDK config
+- Call payment functions
+- Read contract state
+
+❌ **You CANNOT:**
+- Reconfigure them to talk to YOUR contracts
+- Change `remoteReceiver` or `approvedSender` settings
+- Make them work with your custom subnets
+
+**Why?** Only the contract owner can call `setRemoteReceiver()` and `setApprovedSender()`.
+
+**Example:** Our Fuji contracts are configured like this:
+```
+WarpSender (Fuji) → points to → WarpReceiver (Fuji)
+                    ↑
+                    YOU CANNOT CHANGE THIS
+```
+
+**If you want cross-chain between YOUR subnets:**
+1. Deploy your own WarpSender on Subnet A
+2. Deploy your own WarpReceiver on Subnet B
+3. Configure them to talk to each other (you're the owner)
+
 ```typescript
+// This works for testing (same chain):
 const warp = new Warp402({
-  privateKey: process.env.PRIVATE_KEY,
-  senderChain: {
-    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
-    chainId: 43113,
-    blockchainId: "0x7fc93d85...",
-    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
-    sender: "0xSOMEONE_ELSES_SENDER_ADDRESS"
+  ...PRESETS.fuji,  // Both on Fuji, configured to each other
+  privateKey: process.env.PRIVATE_KEY
+});
+
+// This WON'T work (cross-chain with someone else's contracts):
+const warp = new Warp402({
+  senderChain: { 
+    sender: "0xSOMEONES_FUJI_SENDER"  // ← Points to their receiver, not yours
   },
-  receiverChain: {
-    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
-    chainId: 43113,
-    blockchainId: "0x7fc93d85...",
-    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
-    receiver: "0xSOMEONE_ELSES_RECEIVER_ADDRESS"
+  receiverChain: { 
+    receiver: "0xYOUR_LOCAL_RECEIVER"  // ← Won't receive anything
   }
 });
 ```
 
-⚠️ **Security Note**: Only use contracts you trust! Verify them on [Snowtrace](https://testnet.snowtrace.io)
-- RPC URLs
-- Private key with funds
-
 ### Q: Is this production-ready?
 
-**A: YES!**
-- ✅ 60/60 tests passing
-- ✅ OpenZeppelin security libraries
-- ✅ Access control & reentrancy guards
-- ✅ Payment expiry mechanism
-- ✅ Comprehensive error handling
-- ✅ Real cross-chain deployments
+Yes - 60/60 tests passing with OpenZeppelin security libraries.
 
 ### Q: How much does it cost?
 
-- **SDK**: Free (MIT license)
-- **Gas fees**: ~$0.10 per payment (~0.003 AVAX)
-- **Deployment**: ~$1.50 one-time (~0.045 AVAX)
+- SDK: Free (MIT license)
+- Gas: ~$0.10 per payment
+- Deployment: ~$1.50 one-time
 
 ### Q: Where can I get help?
 
-- 📖 [Full Documentation](https://github.com/jayasurya0007/wrap-x402#readme)
-- 💬 [GitHub Issues](https://github.com/jayasurya0007/wrap-x402/issues)
-- 📧 [Contact Team](https://github.com/jayasurya0007)
-- 🎓 [Examples](https://github.com/jayasurya0007/wrap-x402/tree/main/demo)
+- [Documentation](https://github.com/jayasurya0007/wrap-x402)
+- [GitHub Issues](https://github.com/jayasurya0007/wrap-x402/issues)
 
 ---
 
@@ -1109,26 +1186,18 @@ avax-warp-pay/
 
 ---
 
-## 🏆 Features
+## Features
 
-- ✅ **Zero-Config Setup**: Use pre-deployed contracts instantly
-- ✅ **Type-Safe**: Full TypeScript support
-- ✅ **Production-Ready**: Comprehensive testing and security
-- ✅ **Developer-Friendly**: Simple, intuitive API
-- ✅ **Well-Documented**: Examples, guides, and API reference
-- ✅ **Open Source**: MIT license, audit-friendly code
-- ✅ **Battle-Tested**: Real cross-chain deployments
+- TypeScript SDK for cross-chain payments
+- Powered by Avalanche Teleporter/ICM
+- Simple API with comprehensive testing
+- MIT license
 
 ---
 
-## 🌐 Supported Networks
+## Supported Networks
 
-| Network | Chain ID | Blockchain ID | Teleporter |
-|---------|----------|---------------|------------|
-| **Fuji C-Chain** | 43113 | `0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5` | ✅ |
-| **Avalanche Mainnet** | 43114 | `0x9b09de77f3c672e17b9e09ce6f1e33a6c0b82b9f78c3298d1353049f387bcf5d` | ✅ |
-| **Custom Subnets** | Any | Custom | ✅ |
-| **Local Networks** | Any | Custom | ✅ |
+Works with any Avalanche network that supports Teleporter (Fuji, Mainnet, Custom Subnets).
 
 ---
 
@@ -1138,22 +1207,11 @@ MIT © 2025 Warp-402 Team
 
 ---
 
-## 🔗 Links
+## Links
 
-- **NPM Package**: https://www.npmjs.com/package/avax-warp-pay
-- **GitHub**: https://github.com/jayasurya0007/wrap-x402
-- **Smart Contracts**: https://github.com/jayasurya0007/wrap-x402/tree/main/wrapx402/src
-- **Documentation**: https://github.com/jayasurya0007/wrap-x402#readme
-- **Examples**: https://github.com/jayasurya0007/wrap-x402/tree/main/demo
-- **Deployment Guide**: https://github.com/jayasurya0007/wrap-x402/blob/main/DEPLOYMENT_GUIDE.md
-
----
-
-## 🎯 Quick Links
-
-- [Installation](#installation)
-- [Quickstart](#-quickstart--zero-deployment-needed)
-- [Pre-Deployed Contracts](#-pre-deployed-contracts-public-testnet)
+- [NPM Package](https://www.npmjs.com/package/avax-warp-pay)
+- [GitHub Repository](https://github.com/jayasurya0007/wrap-x402)
+- [Smart Contracts](https://github.com/jayasurya0007/wrap-x402/tree/main/wrapx402/src)
 - [Smart Contracts](#-smart-contract-source-code)
 - [API Reference](#-api-reference)
 - [Examples](#-quick-examples)

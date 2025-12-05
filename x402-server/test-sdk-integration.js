@@ -36,11 +36,11 @@ async function testServer() {
     } catch (error) {
       if (error.response && error.response.status === 402) {
         console.log(chalk.green('   ✅ Received HTTP 402 Payment Required'));
-        const payment = error.response.data.paymentDetails;
+        const payment = error.response.data.payment;
         console.log(chalk.gray('   → Payment ID: ' + payment.paymentId));
-        console.log(chalk.gray('   → Amount: ' + payment.priceInEther + ' tokens'));
-        console.log(chalk.gray('   → Sender: ' + payment.sender.substring(0, 20) + '...'));
-        console.log(chalk.gray('   → Receiver: ' + payment.receiver.substring(0, 20) + '...'));
+        console.log(chalk.gray('   → Amount: ' + payment.amountFormatted));
+        console.log(chalk.gray('   → Sender: ' + payment.senderContract.substring(0, 20) + '...'));
+        console.log(chalk.gray('   → Receiver: ' + payment.receiverContract.substring(0, 20) + '...'));
       } else {
         console.log(chalk.red('   ❌ Unexpected error: ' + error.message));
         return false;
