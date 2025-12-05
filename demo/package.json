@@ -1,0 +1,25 @@
+{
+  "name": "x402-demo",
+  "version": "1.0.0",
+  "description": "End-to-end demo for HTTP 402 cross-chain payment system",
+  "main": "demo-client.js",
+  "type": "module",
+  "scripts": {
+    "demo": "node demo-client.js",
+    "demo:verbose": "VERBOSE=true node demo-client.js",
+    "monitor": "node monitor-relayer.js"
+  },
+  "keywords": [
+    "http-402",
+    "avalanche",
+    "demo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "ethers": "^6.9.0",
+    "dotenv": "^16.3.1",
+    "chalk": "^5.3.0"
+  }
+}
