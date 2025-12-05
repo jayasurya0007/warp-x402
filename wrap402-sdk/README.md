@@ -304,6 +304,12 @@ Chain A                          Chain B
 3. ✅ Configure WarpSender → knows where to send (Chain B address)
 4. ✅ Configure WarpReceiver → trusts sender (Chain A address)
 
+**⚠️ CRITICAL: The SDK does NOT perform configuration automatically!**
+- The SDK can only READ contract configuration
+- The SDK can only USE already-configured contracts
+- You MUST manually configure contracts using Foundry/cast commands
+- Configuration requires owner privileges (only deployer can do this)
+
 **Without this handshake, cross-chain payments will NOT work!**
 
 **What you need:**
@@ -339,6 +345,7 @@ forge script script/DeployWarpReceiver.s.sol \
 # ✅ Copy the deployed WarpReceiver address
 
 # Configure contracts (link sender to receiver)
+# ⚠️ SDK CANNOT DO THIS - you must use these commands!
 export SENDER_ADDRESS="0x..."  # From step above
 export RECEIVER_ADDRESS="0x..." # From step above
 export REMOTE_BLOCKCHAIN_ID="0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5"
@@ -791,7 +798,7 @@ const paymentId = await warp.payAndWait(
 Access via `warp.sender`:
 
 ```typescript
-// Get contract configuration
+// Get contract configuration (READ ONLY)
 const config = await warp.sender.getConfiguration();
 console.log(config.owner, config.paused, config.defaultGasLimit);
 
@@ -800,6 +807,9 @@ const balance = await warp.sender.getContractBalance();
 
 // Send payment directly
 await warp.sender.sendPayment(paymentId, amount);
+
+// ⚠️ Note: SDK cannot call setRemoteReceiver() - owner only!
+// Use Foundry/cast commands for configuration
 ```
 
 #### `ReceiverClient`
@@ -814,9 +824,12 @@ const isValid = await warp.receiver.isValidPayment(paymentId);
 const isExpired = await warp.receiver.isExpired(paymentId);
 const isConsumed = await warp.receiver.isConsumed(paymentId);
 
-// Get configuration
+// Get configuration (READ ONLY)
 const config = await warp.receiver.getConfiguration();
 console.log(config.paymentExpiryTime); // in seconds
+
+// ⚠️ Note: SDK cannot call setApprovedSender() - owner only!
+// Use Foundry/cast commands for configuration
 ```
 
 ---
@@ -946,7 +959,7 @@ forge script script/DeployWarpSender.s.sol --rpc-url $SUBNET_A_RPC_URL --broadca
 # Deploy WarpReceiver on Chain B
 forge script script/DeployWarpReceiver.s.sol --rpc-url $SUBNET_B_RPC_URL --broadcast
 
-# Configure contracts
+# Configure contracts (MUST be done manually - SDK cannot do this)
 forge script script/ConfigureSender.s.sol --rpc-url $SUBNET_A_RPC_URL --broadcast
 ```
 
@@ -1057,6 +1070,12 @@ WarpSender (Chain A)  ✅  WarpReceiver (Chain B)
 
 **Who can do it:** Only the contract owner (deployer)
 
+**⚠️ Important: The SDK does NOT configure contracts!**
+- SDK can only **READ** configuration: `warp.sender.getConfiguration()`
+- SDK can only **USE** pre-configured contracts: `warp.pay()`, `warp.verify()`
+- SDK **CANNOT** call `setRemoteReceiver()` or `setApprovedSender()`
+- You must use **Foundry/cast commands** to configure contracts manually
+
 ### Q: Where do I get contract addresses for Fuji/Mainnet?
 
 **A: You have 3 options:**
@@ -1122,6 +1141,19 @@ await receiverContract.setApprovedSender(
 - ❌ Cross-chain payments fail completely
 
 **Only the contract owner can perform this handshake!** This is why you can't use someone else's contracts for your own cross-chain setup.
+
+**How to configure (SDK cannot do this):**
+```bash
+# Configure WarpSender on Chain A
+cast send <SENDER_ADDRESS> "setRemoteReceiver(bytes32,address)" \
+  <CHAIN_B_BLOCKCHAIN_ID> <RECEIVER_ADDRESS> \
+  --rpc-url <CHAIN_A_RPC> --private-key <YOUR_KEY>
+
+# Configure WarpReceiver on Chain B  
+cast send <RECEIVER_ADDRESS> "setApprovedSender(bytes32,address)" \
+  <CHAIN_A_BLOCKCHAIN_ID> <SENDER_ADDRESS> \
+  --rpc-url <CHAIN_B_RPC> --private-key <YOUR_KEY>
+```
 
 ### Q: Can I use someone else's deployed contracts?
 
