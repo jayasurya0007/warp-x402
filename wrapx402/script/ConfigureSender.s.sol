@@ -10,7 +10,7 @@ contract ConfigureSender is Script {
         vm.startBroadcast(pk);
 
         // REPLACE WITH YOUR DEPLOYED SENDER ADDRESS
-        address senderAddress = vm.envOr("SENDER_ADDRESS", address(0));
+        address payable senderAddress = payable(vm.envOr("SENDER_ADDRESS", address(0)));
         require(senderAddress != address(0), "SENDER_ADDRESS env var not set");
         
         WarpSender sender = WarpSender(senderAddress);

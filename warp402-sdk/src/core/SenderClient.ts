@@ -45,10 +45,10 @@ export class SenderClient {
       // Format payment ID to bytes32
       const paymentIdBytes32 = toBytes32(paymentId);
       
-      // Send transaction
+      // Send transaction with new signature (paymentId only, value in msg.value)
+      // The contract now binds this to payer address and timestamp for security
       const tx = await this.contract.sendPayment(
         paymentIdBytes32,
-        amount,
         {
           value: amount,
           gasLimit: 500000
@@ -89,23 +89,45 @@ export class SenderClient {
    * @returns Contract configuration
    */
   async getConfiguration(): Promise<{
-    receiverChainId: string;
-    receiverAddress: string;
-    teleporterMessenger: string;
+    remoteBlockchainId: string;
+    remoteReceiver: string;
+    messenger: string;
+    owner: string;
+    paused: boolean;
+    defaultGasLimit: bigint;
+    messageGasLimit: bigint;
   }> {
     logger.debug('Fetching sender contract configuration');
 
-    const [receiverChainId, receiverAddress, teleporterMessenger] = await Promise.all([
-      this.contract.receiverChainId(),
-      this.contract.receiverAddress(),
-      this.contract.teleporterMessenger()
+    const [remoteBlockchainId, remoteReceiver, messenger, owner, paused, defaultGasLimit, messageGasLimit] = await Promise.all([
+      this.contract.remoteBlockchainId(),
+      this.contract.remoteReceiver(),
+      this.contract.MESSENGER(),
+      this.contract.owner(),
+      this.contract.paused(),
+      this.contract.defaultGasLimit(),
+      this.contract.messageGasLimit()
     ]);
 
     return {
-      receiverChainId,
-      receiverAddress,
-      teleporterMessenger
+      remoteBlockchainId,
+      remoteReceiver,
+      messenger,
+      owner,
+      paused,
+      defaultGasLimit,
+      messageGasLimit
     };
+  }
+  
+  /**
+   * Get contract balance (for owner to check before withdrawing)
+   * @returns Balance in wei
+   */
+  async getContractBalance(): Promise<bigint> {
+    const balance = await this.contract.getBalance();
+    logger.debug(`Contract balance: ${ethers.formatEther(balance)} tokens`);
+    return balance;
   }
 
   /**

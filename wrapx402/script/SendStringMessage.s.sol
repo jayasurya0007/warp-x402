@@ -9,7 +9,7 @@ contract SendStringMessage is Script {
         uint256 pk = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(pk);
 
-        address senderAddress = vm.envOr("SENDER_ADDRESS", address(0));
+        address payable senderAddress = payable(vm.envOr("SENDER_ADDRESS", address(0)));
         WarpSender sender = WarpSender(senderAddress);
 
         console.log("Sending string message...");

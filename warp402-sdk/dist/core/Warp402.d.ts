@@ -71,18 +71,26 @@ export declare class Warp402 {
      * @returns Sender configuration
      */
     getSenderConfig(): Promise<{
-        receiverChainId: string;
-        receiverAddress: string;
-        teleporterMessenger: string;
+        remoteBlockchainId: string;
+        remoteReceiver: string;
+        messenger: string;
+        owner: string;
+        paused: boolean;
+        defaultGasLimit: bigint;
+        messageGasLimit: bigint;
     }>;
     /**
      * Get receiver contract configuration
      * @returns Receiver configuration
      */
     getReceiverConfig(): Promise<{
-        senderChainId: string;
-        senderAddress: string;
-        teleporterMessenger: string;
+        approvedSender: string;
+        approvedSourceBlockchainId: string;
+        messenger: string;
+        owner: string;
+        paused: boolean;
+        requiredPaymentAmount: bigint;
+        paymentExpiryTime: bigint;
     }>;
     /**
      * Set SDK log level

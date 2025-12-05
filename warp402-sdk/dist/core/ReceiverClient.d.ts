@@ -22,6 +22,24 @@ export declare class ReceiverClient {
      */
     getReceipt(paymentId: string): Promise<PaymentReceipt | null>;
     /**
+     * Check if payment is consumed
+     * @param paymentId Payment identifier
+     * @returns true if consumed
+     */
+    isConsumed(paymentId: string): Promise<boolean>;
+    /**
+     * Check if payment is expired
+     * @param paymentId Payment identifier
+     * @returns true if expired
+     */
+    isExpired(paymentId: string): Promise<boolean>;
+    /**
+     * Check if payment is valid (exists, not consumed, not expired)
+     * @param paymentId Payment identifier
+     * @returns true if valid
+     */
+    isValidPayment(paymentId: string): Promise<boolean>;
+    /**
      * Verify payment and get details
      * @param paymentId Payment identifier
      * @returns Payment verification result
@@ -39,9 +57,13 @@ export declare class ReceiverClient {
      * @returns Contract configuration
      */
     getConfiguration(): Promise<{
-        senderChainId: string;
-        senderAddress: string;
-        teleporterMessenger: string;
+        approvedSender: string;
+        approvedSourceBlockchainId: string;
+        messenger: string;
+        owner: string;
+        paused: boolean;
+        requiredPaymentAmount: bigint;
+        paymentExpiryTime: bigint;
     }>;
     /**
      * Get chain configuration

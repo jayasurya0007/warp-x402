@@ -35,8 +35,9 @@ class SenderClient {
         try {
             // Format payment ID to bytes32
             const paymentIdBytes32 = (0, encoding_1.toBytes32)(paymentId);
-            // Send transaction
-            const tx = await this.contract.sendPayment(paymentIdBytes32, amount, {
+            // Send transaction with new signature (paymentId only, value in msg.value)
+            // The contract now binds this to payer address and timestamp for security
+            const tx = await this.contract.sendPayment(paymentIdBytes32, {
                 value: amount,
                 gasLimit: 500000
             });
@@ -71,16 +72,33 @@ class SenderClient {
      */
     async getConfiguration() {
         logger_1.logger.debug('Fetching sender contract configuration');
-        const [receiverChainId, receiverAddress, teleporterMessenger] = await Promise.all([
-            this.contract.receiverChainId(),
-            this.contract.receiverAddress(),
-            this.contract.teleporterMessenger()
+        const [remoteBlockchainId, remoteReceiver, messenger, owner, paused, defaultGasLimit, messageGasLimit] = await Promise.all([
+            this.contract.remoteBlockchainId(),
+            this.contract.remoteReceiver(),
+            this.contract.MESSENGER(),
+            this.contract.owner(),
+            this.contract.paused(),
+            this.contract.defaultGasLimit(),
+            this.contract.messageGasLimit()
         ]);
         return {
-            receiverChainId,
-            receiverAddress,
-            teleporterMessenger
+            remoteBlockchainId,
+            remoteReceiver,
+            messenger,
+            owner,
+            paused,
+            defaultGasLimit,
+            messageGasLimit
         };
+    }
+    /**
+     * Get contract balance (for owner to check before withdrawing)
+     * @returns Balance in wei
+     */
+    async getContractBalance() {
+        const balance = await this.contract.getBalance();
+        logger_1.logger.debug(`Contract balance: ${ethers_1.ethers.formatEther(balance)} tokens`);
+        return balance;
     }
     /**
      * Get wallet address

@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start:sdk": "node server-sdk.js",
+    "dev": "node --watch server.js",
+    "dev:sdk": "node --watch server-sdk.js"
   },
   "keywords": [
     "http-402",

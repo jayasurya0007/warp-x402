@@ -2,8 +2,10 @@
 pragma solidity ^0.8.18;
 
 import {ITeleporterReceiver} from "./TeleporterInterfaces.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
-contract WarpReceiver is ITeleporterReceiver {
+contract WarpReceiver is ITeleporterReceiver, Ownable, Pausable {
     address public immutable MESSENGER;
     
     // Payment receipt structure
@@ -27,6 +29,9 @@ contract WarpReceiver is ITeleporterReceiver {
     
     // Required payment amount for access
     uint256 public requiredPaymentAmount;
+    
+    // Payment expiry time (in seconds) - 0 means no expiry
+    uint256 public paymentExpiryTime = 7 days;
 
     // Events
     event PaymentReceived(
@@ -40,8 +45,12 @@ contract WarpReceiver is ITeleporterReceiver {
         bytes32 indexed paymentId,
         address indexed consumer
     );
+    
+    event ApprovedSenderUpdated(bytes32 blockchainId, address sender);
+    event RequiredAmountUpdated(uint256 newAmount);
+    event PaymentExpiryUpdated(uint256 newExpiry);
 
-    constructor(address _messenger) {
+    constructor(address _messenger) Ownable(msg.sender) {
         MESSENGER = _messenger;
         requiredPaymentAmount = 0; // Default: no minimum required
     }
@@ -52,15 +61,34 @@ contract WarpReceiver is ITeleporterReceiver {
         _;
     }
 
-    // Owner configures who can send messages
-    function setApprovedSender(bytes32 _sourceBlockchainId, address _sender) external {
+    // Owner configures who can send messages (owner only)
+    function setApprovedSender(bytes32 _sourceBlockchainId, address _sender) external onlyOwner {
+        require(_sender != address(0), "Invalid sender address");
         approvedSourceBlockchainId = _sourceBlockchainId;
         approvedSender = _sender;
+        emit ApprovedSenderUpdated(_sourceBlockchainId, _sender);
     }
 
-    // Set required payment amount
-    function setRequiredPaymentAmount(uint256 _amount) external {
+    // Set required payment amount (owner only)
+    function setRequiredPaymentAmount(uint256 _amount) external onlyOwner {
         requiredPaymentAmount = _amount;
+        emit RequiredAmountUpdated(_amount);
+    }
+    
+    // Set payment expiry time (owner only)
+    function setPaymentExpiryTime(uint256 _expiryTime) external onlyOwner {
+        paymentExpiryTime = _expiryTime;
+        emit PaymentExpiryUpdated(_expiryTime);
+    }
+    
+    // Emergency pause (owner only)
+    function pause() external onlyOwner {
+        _pause();
+    }
+    
+    // Unpause (owner only)
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     // Check if payment has been made
@@ -79,11 +107,39 @@ contract WarpReceiver is ITeleporterReceiver {
         require(hasPaid(paymentId), "Payment not found");
         return payments[paymentId].consumed;
     }
+    
+    // Check if payment has expired
+    function isExpired(bytes32 paymentId) public view returns (bool) {
+        require(hasPaid(paymentId), "Payment not found");
+        
+        // If expiry is 0, payments never expire
+        if (paymentExpiryTime == 0) {
+            return false;
+        }
+        
+        PaymentReceipt memory receipt = payments[paymentId];
+        return block.timestamp > receipt.timestamp + paymentExpiryTime;
+    }
+    
+    // Check if payment is valid (exists, not consumed, not expired)
+    function isValidPayment(bytes32 paymentId) public view returns (bool) {
+        if (!hasPaid(paymentId)) {
+            return false;
+        }
+        if (isConsumed(paymentId)) {
+            return false;
+        }
+        if (isExpired(paymentId)) {
+            return false;
+        }
+        return true;
+    }
 
     // Consume a payment (mark as used)
-    function consumePayment(bytes32 paymentId) external {
+    function consumePayment(bytes32 paymentId) external whenNotPaused {
         require(hasPaid(paymentId), "Payment not found");
         require(!isConsumed(paymentId), "Payment already consumed");
+        require(!isExpired(paymentId), "Payment has expired");
         
         payments[paymentId].consumed = true;
         
@@ -95,7 +151,7 @@ contract WarpReceiver is ITeleporterReceiver {
         bytes32 originBlockchainID,
         address originSenderAddress,
         bytes calldata message
-    ) external override onlyTeleporter {
+    ) external override onlyTeleporter whenNotPaused {
         // Validate origin chain ID matches approved source
         require(
             approvedSourceBlockchainId == bytes32(0) || originBlockchainID == approvedSourceBlockchainId,

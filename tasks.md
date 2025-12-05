@@ -543,7 +543,6 @@ wrap-x402/
 │   ├── src/
 │   │   ├── WarpSender.sol            # Payment sender (Subnet A / Fuji C-Chain)
 │   │   ├── WarpReceiver.sol          # Payment receiver (Subnet B / Fuji C-Chain)
-│   │   ├── DirectWarpSender.sol      # Direct warp interface
 │   │   └── TeleporterInterfaces.sol  # ICM/Teleporter interfaces
 │   ├── script/
 │   │   ├── DeployWarpSender.s.sol    # Local deployment

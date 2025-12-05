@@ -26,10 +26,19 @@ export declare class SenderClient {
      * @returns Contract configuration
      */
     getConfiguration(): Promise<{
-        receiverChainId: string;
-        receiverAddress: string;
-        teleporterMessenger: string;
+        remoteBlockchainId: string;
+        remoteReceiver: string;
+        messenger: string;
+        owner: string;
+        paused: boolean;
+        defaultGasLimit: bigint;
+        messageGasLimit: bigint;
     }>;
+    /**
+     * Get contract balance (for owner to check before withdrawing)
+     * @returns Balance in wei
+     */
+    getContractBalance(): Promise<bigint>;
     /**
      * Get wallet address
      * @returns Wallet address

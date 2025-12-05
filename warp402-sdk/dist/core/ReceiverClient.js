@@ -49,6 +49,7 @@ class ReceiverClient {
         try {
             const paymentIdBytes32 = (0, encoding_1.toBytes32)(paymentId);
             const receipt = await this.contract.getReceipt(paymentIdBytes32);
+            // Receipt is now returned as a tuple struct
             // Check if receipt exists (payer is not zero address)
             if (receipt.payer === ethers_1.ethers.ZeroAddress) {
                 logger_1.logger.debug(`Receipt not found for payment ${paymentId}`);
@@ -70,14 +71,63 @@ class ReceiverClient {
         }
     }
     /**
+     * Check if payment is consumed
+     * @param paymentId Payment identifier
+     * @returns true if consumed
+     */
+    async isConsumed(paymentId) {
+        logger_1.logger.debug(`Checking if payment ${paymentId} is consumed`);
+        try {
+            const paymentIdBytes32 = (0, encoding_1.toBytes32)(paymentId);
+            return await this.contract.isConsumed(paymentIdBytes32);
+        }
+        catch (error) {
+            logger_1.logger.error(`Failed to check consumed status: ${error.message}`);
+            return false;
+        }
+    }
+    /**
+     * Check if payment is expired
+     * @param paymentId Payment identifier
+     * @returns true if expired
+     */
+    async isExpired(paymentId) {
+        logger_1.logger.debug(`Checking if payment ${paymentId} is expired`);
+        try {
+            const paymentIdBytes32 = (0, encoding_1.toBytes32)(paymentId);
+            return await this.contract.isExpired(paymentIdBytes32);
+        }
+        catch (error) {
+            logger_1.logger.error(`Failed to check expired status: ${error.message}`);
+            return false;
+        }
+    }
+    /**
+     * Check if payment is valid (exists, not consumed, not expired)
+     * @param paymentId Payment identifier
+     * @returns true if valid
+     */
+    async isValidPayment(paymentId) {
+        logger_1.logger.debug(`Checking if payment ${paymentId} is valid`);
+        try {
+            const paymentIdBytes32 = (0, encoding_1.toBytes32)(paymentId);
+            return await this.contract.isValidPayment(paymentIdBytes32);
+        }
+        catch (error) {
+            logger_1.logger.error(`Failed to check payment validity: ${error.message}`);
+            return false;
+        }
+    }
+    /**
      * Verify payment and get details
      * @param paymentId Payment identifier
      * @returns Payment verification result
      */
     async verify(paymentId) {
         const receipt = await this.getReceipt(paymentId);
+        const isValid = await this.isValidPayment(paymentId);
         return {
-            isValid: receipt !== null && !receipt.consumed,
+            isValid: isValid && receipt !== null,
             receipt: receipt || undefined
         };
     }
@@ -123,15 +173,23 @@ class ReceiverClient {
      */
     async getConfiguration() {
         logger_1.logger.debug('Fetching receiver contract configuration');
-        const [senderChainId, senderAddress, teleporterMessenger] = await Promise.all([
-            this.contract.senderChainId(),
-            this.contract.senderAddress(),
-            this.contract.teleporterMessenger()
+        const [approvedSender, approvedSourceBlockchainId, messenger, owner, paused, requiredPaymentAmount, paymentExpiryTime] = await Promise.all([
+            this.contract.approvedSender(),
+            this.contract.approvedSourceBlockchainId(),
+            this.contract.MESSENGER(),
+            this.contract.owner(),
+            this.contract.paused(),
+            this.contract.requiredPaymentAmount(),
+            this.contract.paymentExpiryTime()
         ]);
         return {
-            senderChainId,
-            senderAddress,
-            teleporterMessenger
+            approvedSender,
+            approvedSourceBlockchainId,
+            messenger,
+            owner,
+            paused,
+            requiredPaymentAmount,
+            paymentExpiryTime
         };
     }
     /**

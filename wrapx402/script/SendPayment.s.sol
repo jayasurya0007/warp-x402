@@ -9,7 +9,7 @@ contract SendPayment is Script {
         uint256 pk = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(pk);
 
-        address senderAddress = vm.envOr("SENDER_ADDRESS", address(0));
+        address payable senderAddress = payable(vm.envOr("SENDER_ADDRESS", address(0)));
         require(senderAddress != address(0), "SENDER_ADDRESS env var not set");
 
         WarpSender sender = WarpSender(senderAddress);

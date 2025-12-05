@@ -1,0 +1,3 @@
+[submodule "wrapx402/lib/openzeppelin-contracts"]
+	path = wrapx402/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
