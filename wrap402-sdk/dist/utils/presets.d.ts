@@ -12,7 +12,9 @@ export declare const LOCAL_PRESET: Omit<Warp402Config, 'privateKey'>;
  * Fuji testnet preset
  * Uses officially deployed contracts on Avalanche Fuji C-Chain
  *
- * ⚠️ For testing only - deploy your own contracts for production
+ * ✅ Production-ready contracts deployed and verified
+ * ✅ Free to use for testing
+ * ⚠️ For mainnet, deploy your own contracts for full control
  */
 export declare const FUJI_PRESET: Omit<Warp402Config, 'privateKey'>;
 /**
@@ -65,10 +67,12 @@ export declare const DEPLOYED_CONTRACTS: {
         readonly explorer: null;
     };
     readonly fuji: {
-        readonly sender: "0x52C84043CD9c865236f11d9Fc9F56aa003c1f922";
-        readonly receiver: "0x52C84043CD9c865236f11d9Fc9F56aa003c1f922";
-        readonly network: "Avalanche Fuji Testnet";
+        readonly sender: "0x0d45537c1DA893148dBB113407698E20CfA2eE56";
+        readonly receiver: "0x2A3E54D66c78cB58052B8eAb677c973814Bc8A3f";
+        readonly network: "Avalanche Fuji Testnet (C-Chain)";
         readonly explorer: "https://testnet.snowtrace.io";
+        readonly senderUrl: "https://testnet.snowtrace.io/address/0x0d45537c1DA893148dBB113407698E20CfA2eE56";
+        readonly receiverUrl: "https://testnet.snowtrace.io/address/0x2A3E54D66c78cB58052B8eAb677c973814Bc8A3f";
     };
 };
 //# sourceMappingURL=presets.d.ts.map

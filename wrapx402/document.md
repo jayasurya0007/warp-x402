@@ -51,7 +51,7 @@ export TELEPORTER_MESSENGER=0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf
 ### Step 1: Create Subnet A
 
 ```bash
-avalanche subnet create subnetA
+avalanche blockchain create subnetA
 ```
 
 **Configuration Options:**
@@ -65,7 +65,7 @@ avalanche subnet create subnetA
 ### Step 2: Create Subnet B
 
 ```bash
-avalanche subnet create subnetB
+avalanche blockchain create subnetB
 ```
 
 **Configuration Options:**
@@ -78,8 +78,8 @@ avalanche subnet create subnetB
 
 ```bash
 # Start local network with both subnets
-avalanche subnet deploy subnetA --local
-avalanche subnet deploy subnetB --local
+avalanche blockchain deploy subnetA --local
+avalanche blockchain deploy subnetB --local
 ```
 
 **Important Outputs to Note:**
@@ -927,8 +927,8 @@ avalanche network stop
 avalanche network clean
 
 # Restart
-avalanche subnet deploy subnetA --local
-avalanche subnet deploy subnetB --local
+avalanche blockchain deploy subnetA --local
+avalanche blockchain deploy subnetB --local
 ```
 
 ---
@@ -939,8 +939,8 @@ avalanche subnet deploy subnetB --local
 
 ```bash
 # Network Management
-avalanche subnet create <name>
-avalanche subnet deploy <name> --local
+avalanche blockchain create <name>
+avalanche blockchain deploy <name> --local
 avalanche network status
 avalanche network stop
 avalanche network clean
@@ -971,20 +971,230 @@ ps aux | grep icm-relayer
 
 ---
 
+## Deploying to Fuji Testnet
+
+### Prerequisites
+
+1. **Get Fuji AVAX from Faucet:**
+   - Visit: https://faucet.avax.network/
+   - Connect wallet and request testnet AVAX
+   - Wait for confirmation (~30 seconds)
+
+2. **Set Up Your Private Key:**
+```bash
+# NEVER use this key for mainnet!
+export PRIVATE_KEY=your_fuji_testnet_private_key
+```
+
+### Step 1: Deploy WarpReceiver to Fuji
+
+```bash
+# Deploy to Fuji C-Chain
+PRIVATE_KEY=$PRIVATE_KEY \
+forge script script/DeployWarpReceiver.s.sol:DeployWarpReceiver \
+  --rpc-url https://api.avax-test.network/ext/bc/C/rpc \
+  --broadcast \
+  --verify \
+  --etherscan-api-key $SNOWTRACE_API_KEY
+
+# Save the deployed address
+export FUJI_RECEIVER_ADDRESS=<deployed_address>
+```
+
+**Example Output:**
+```
+WarpReceiver deployed at: 0x1234567890abcdef1234567890abcdef12345678
+```
+
+### Step 2: Deploy WarpSender to Fuji
+
+```bash
+# Deploy to Fuji C-Chain
+PRIVATE_KEY=$PRIVATE_KEY \
+forge script script/DeployWarpSender.s.sol:DeployWarpSender \
+  --rpc-url https://api.avax-test.network/ext/bc/C/rpc \
+  --broadcast \
+  --verify \
+  --etherscan-api-key $SNOWTRACE_API_KEY
+
+# Save the deployed address
+export FUJI_SENDER_ADDRESS=<deployed_address>
+```
+
+### Step 3: Configure Sender with Receiver
+
+```bash
+# Get Fuji C-Chain blockchain ID (already known)
+export FUJI_BLOCKCHAIN_ID=0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5
+
+# Configure sender
+PRIVATE_KEY=$PRIVATE_KEY \
+SENDER_ADDRESS=$FUJI_SENDER_ADDRESS \
+RECEIVER_ADDRESS=$FUJI_RECEIVER_ADDRESS \
+REMOTE_BLOCKCHAIN_ID=$FUJI_BLOCKCHAIN_ID \
+forge script script/ConfigureSender.s.sol:ConfigureSender \
+  --rpc-url https://api.avax-test.network/ext/bc/C/rpc \
+  --broadcast
+```
+
+### Step 4: Use SDK with Your Deployed Contracts
+
+Now update your SDK configuration:
+
+```typescript
+// File: your-app/config.ts
+import { Warp402 } from 'avax-warp-pay';
+
+const warp = new Warp402({
+  senderChain: {
+    rpc: 'https://api.avax-test.network/ext/bc/C/rpc',
+    chainId: 43113,
+    blockchainId: '0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5',
+    messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
+    sender: process.env.FUJI_SENDER_ADDRESS!  // Your deployed address
+  },
+  receiverChain: {
+    rpc: 'https://api.avax-test.network/ext/bc/C/rpc',
+    chainId: 43113,
+    blockchainId: '0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5',
+    messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
+    receiver: process.env.FUJI_RECEIVER_ADDRESS!  // Your deployed address
+  },
+  privateKey: process.env.PRIVATE_KEY!
+});
+
+// Test payment
+const receipt = await warp.pay({
+  amount: '1000000000000000000', // 1 AVAX
+  resourceUrl: '/premium-content',
+  payerAddress: '0xYourAddress'
+});
+
+console.log('Payment sent:', receipt.paymentId);
+```
+
+### Step 5: Test Cross-Chain Payment
+
+```bash
+# Generate payment ID
+PAYMENT_ID=$(cast keccak "fuji-test-payment-$(date +%s)")
+
+# Send payment on Fuji
+cast send $FUJI_SENDER_ADDRESS \
+  "sendPayment(bytes32)" $PAYMENT_ID \
+  --value 1000000000000000000 \
+  --private-key $PRIVATE_KEY \
+  --rpc-url https://api.avax-test.network/ext/bc/C/rpc
+
+# Wait 30-60 seconds for Fuji block confirmations
+
+# Verify payment received
+cast call $FUJI_RECEIVER_ADDRESS \
+  "hasPaid(bytes32)(bool)" $PAYMENT_ID \
+  --rpc-url https://api.avax-test.network/ext/bc/C/rpc
+```
+
+### Step 6: Verify on Snowtrace
+
+Visit https://testnet.snowtrace.io and search for:
+- Your WarpSender address
+- Your WarpReceiver address
+- Recent transaction hashes
+
+### Alternative: Deploy to Custom Fuji Subnets
+
+If you want cross-subnet payments (not same C-Chain):
+
+```bash
+# 1. Create and deploy your custom Fuji subnet
+avalanche blockchain create myFujiSubnet
+avalanche blockchain deploy myFujiSubnet --fuji
+
+# 2. Get blockchain IDs for both subnets
+# (Use decode_cb58.py for hex conversion)
+
+# 3. Deploy WarpSender to Subnet A
+forge script script/DeployWarpSender.s.sol:DeployWarpSender \
+  --rpc-url <subnet_a_fuji_rpc> \
+  --broadcast
+
+# 4. Deploy WarpReceiver to Subnet B  
+forge script script/DeployWarpReceiver.s.sol:DeployWarpReceiver \
+  --rpc-url <subnet_b_fuji_rpc> \
+  --broadcast
+
+# 5. Configure with cross-subnet blockchain IDs
+```
+
+### Important Notes for Fuji
+
+⚠️ **Relayer Considerations:**
+- On local networks, ICM relayer runs automatically
+- On Fuji, you need to either:
+  - Run your own AWM relayer
+  - Use a public relayer service
+  - Wait longer for message delivery (can take minutes)
+
+⚠️ **Gas and Fees:**
+- Fuji transactions cost real testnet AVAX
+- Keep enough AVAX balance for gas
+- Consider adding relayer fees for faster delivery
+
+⚠️ **Network Delays:**
+- Fuji has real block times (~2 seconds)
+- Cross-chain messages take 30-60 seconds minimum
+- Add proper timeout handling in your application
+
+### Fuji SDK Configuration Template
+
+```typescript
+// .env file
+PRIVATE_KEY=your_private_key_here
+FUJI_SENDER_ADDRESS=0x... // Your deployed WarpSender
+FUJI_RECEIVER_ADDRESS=0x... // Your deployed WarpReceiver
+
+// config.ts
+export const FUJI_CONFIG = {
+  senderChain: {
+    rpc: 'https://api.avax-test.network/ext/bc/C/rpc',
+    chainId: 43113,
+    blockchainId: '0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5',
+    messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
+    sender: process.env.FUJI_SENDER_ADDRESS!
+  },
+  receiverChain: {
+    rpc: 'https://api.avax-test.network/ext/bc/C/rpc',
+    chainId: 43113,
+    blockchainId: '0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5',
+    messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
+    receiver: process.env.FUJI_RECEIVER_ADDRESS!
+  },
+  privateKey: process.env.PRIVATE_KEY!
+};
+```
+
+---
+
 ## Deployed Contract Addresses (Example)
 
-### Subnet A (bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn)
+### Local Development Network
+
+#### Subnet A (bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn)
 - **Chain ID**: 1001
 - **RPC**: http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc
 - **WarpSender**: 0x7B4982e1F7ee384F206417Fb851a1EB143c513F9
 - **Teleporter Messenger**: 0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf
 
-### Subnet B (2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k)
+#### Subnet B (2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k)
 - **Chain ID**: 1002  
 - **Blockchain ID (Hex)**: 0xb1827c625b4b61ae5cd9efb6b8acf274302add82948e78f6dc160b865149a8d0
 - **RPC**: http://127.0.0.1:9652/ext/bc/2MBFLxCkhVCLXvVeLvzqXrzjAVRQuKj6Aygq49a3dcsKs6AX3k/rpc
 - **WarpReceiver**: 0xA4cD3b0Eb6E5Ab5d8CE4065BcCD70040ADAB1F00
 - **Teleporter Messenger**: 0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf
+
+### Fuji Testnet
+
+**You must deploy your own contracts.** See "Deploying to Fuji Testnet" section above.
 
 ---
 

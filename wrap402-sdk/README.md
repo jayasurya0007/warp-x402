@@ -18,41 +18,139 @@ npm install avax-warp-pay
 ```typescript
 import { Warp402, PRESETS } from 'avax-warp-pay';
 
-// Use pre-deployed contracts on Fuji testnet
-const warp = new Warp402(PRESETS.fuji);
+// Use pre-deployed contracts on Fuji testnet - NO DEPLOYMENT NEEDED!
+const warp = new Warp402({
+  ...PRESETS.fuji,
+  privateKey: process.env.PRIVATE_KEY  // Your Fuji testnet private key
+});
 
-// Send cross-chain payment
+// Send cross-chain payment (requires testnet AVAX for gas)
 const paymentId = await warp.pay(ethers.parseEther("0.1"));
 console.log("✅ Payment sent:", paymentId);
 
-// Wait for Teleporter relay (10-30 seconds)
-await new Promise(r => setTimeout(r, 15000));
+// Wait for Teleporter relay (~30 seconds on Fuji)
+await new Promise(r => setTimeout(r, 30000));
 
 // Verify on destination chain
 const verified = await warp.verify(paymentId);
 console.log("✅ Verified:", verified);
 ```
 
-**That's it!** No contract deployment needed. Uses our official pre-deployed contracts.
+**That's it!** Using real contracts on Avalanche Fuji testnet.
+
+> 💰 **Get testnet AVAX**: https://faucet.avax.network/
 
 ---
 
-## 📦 Pre-Deployed Contracts (Public Testnet)
+## 🤔 "Do I Need to Deploy Contracts?" - Decision Tree
 
-We've deployed **production-ready contracts** on Avalanche Fuji for instant testing:
+```
+┌─────────────────────────────────────────┐
+│  What are you trying to do?            │
+└────────────┬────────────────────────────┘
+             │
+   ┌─────────┴──────────┐
+   │                    │
+   ▼                    ▼
+Testing on          Testing on
+local network?      Fuji testnet?
+   │                    │
+   ▼                    ▼
+Use PRESETS.local   Use PRESETS.fuji
+✅ No deployment!   ✅ No deployment!
+(local only)        (uses our contracts)
+   │                    │
+   │                    ├─────────────────┐
+   │                    │                 │
+   │                    ▼                 ▼
+   │              Production on      Custom subnet
+   │              mainnet?            deployment?
+   │                    │                 │
+   │                    ▼                 ▼
+   │              Deploy your own    Deploy your own
+   │              contracts          contracts
+   │              (see guide)        (see guide)
+   │                    │                 │
+   └────────────────────┴─────────────────┘
+                        │
+                        ▼
+           Configure SDK with addresses
+                        │
+                        ▼
+                   Start coding! 🚀
+```
 
-### Local Network (Development)
+> ✅ **Good news:** We have pre-deployed, verified contracts on Fuji testnet - ready to use!
 
-| Component | Address | Chain ID | Purpose |
-|-----------|---------|----------|---------|
-| **WarpSender** | `0x52C84043CD9c865236f11d9Fc9F56aa003c1f922` | 1001 | Send payments |
-| **WarpReceiver** | `0x52C84043CD9c865236f11d9Fc9F56aa003c1f922` | 1002 | Verify receipts |
+---
 
-**Teleporter Messenger**: `0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf`
+## 📦 Pre-Deployed Contracts - Ready to Use!
+
+### ✅ Fuji Testnet (Public - Free to Use!)
+
+We've deployed **production-ready contracts** on Avalanche Fuji C-Chain for instant testing:
+
+| Component | Address | Network | Purpose |
+|-----------|---------|---------|---------|
+| **WarpSender** | `0x0d45537c1DA893148dBB113407698E20CfA2eE56` | Fuji C-Chain | Send payments |
+| **WarpReceiver** | `0x2A3E54D66c78cB58052B8eAb677c973814Bc8A3f` | Fuji C-Chain | Verify receipts |
+| **Teleporter Messenger** | `0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf` | Fuji C-Chain | ICM messaging |
+
+**Network Details:**
+- RPC URL: `https://api.avax-test.network/ext/bc/C/rpc`
+- Chain ID: `43113`
+- Blockchain ID: `0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5`
+
+**Verify on Snowtrace:**
+- 🔍 [WarpSender](https://testnet.snowtrace.io/address/0x0d45537c1DA893148dBB113407698E20CfA2eE56)
+- 🔍 [WarpReceiver](https://testnet.snowtrace.io/address/0x2A3E54D66c78cB58052B8eAb677c973814Bc8A3f)
+
+### 🚀 Quick Start with Fuji
+
+```typescript
+import { Warp402, PRESETS } from 'avax-warp-pay';
+
+// Use pre-deployed contracts on Fuji - ZERO deployment needed!
+const warp = new Warp402({
+  ...PRESETS.fuji,
+  privateKey: process.env.PRIVATE_KEY
+});
+
+// Send cross-chain payment (costs ~0.002 AVAX gas)
+const paymentId = await warp.pay(ethers.parseEther("0.1"));
+console.log("✅ Payment sent:", paymentId);
+
+// Wait for Teleporter relay (~30 seconds on Fuji)
+await new Promise(r => setTimeout(r, 30000));
+
+// Verify on destination
+const verified = await warp.verify(paymentId);
+console.log("✅ Verified:", verified);
+```
+
+### For Local Testing
+
+The `PRESETS.local` configuration is for **local Avalanche networks only**:
+
+```typescript
+// This ONLY works on local networks, NOT on public testnets
+const warp = new Warp402({
+  ...PRESETS.local,
+  privateKey: process.env.PRIVATE_KEY
+});
+```
 
 ### ⚠️ Production Note
-These contracts are **for testing and demonstrations only**.  
-For production deployments, you **must deploy your own contracts**.
+
+These Fuji contracts are **fully functional and free to use** for testing. For production mainnet deployments, you should deploy your own contracts for full control.
+
+### Want to Deploy Your Own?
+
+See our [Deployment Guide](#deploying-your-own-contracts) below if you need:
+- Custom configuration (gas limits, expiry times)
+- Private subnet deployment
+- Mainnet deployment
+- Full ownership and control
 
 ---
 
@@ -99,31 +197,149 @@ npm install avax-warp-pay ethers@^6
 
 ## ⚠️ Prerequisites
 
-### Option 1: Use Pre-Deployed Contracts (Recommended for Testing)
+> **👤 SDK User? Start Here!**
+> 
+> You **don't need to deploy contracts yourself** if:
+> - ✅ You're just testing (use `PRESETS.local`)
+> - ✅ Your platform has contracts deployed (they'll give you addresses)
+> 
+> You **only need to deploy** if:
+> - ❌ You want production control
+> - ❌ No one else has deployed for your network
+>
+> **tl;dr: Most SDK users just need contract addresses, not deployment!**
 
-✅ **No deployment needed!** Use our Fuji testnet contracts:
+---
+
+You have **3 options** to use this SDK:
+
+### Option 1: Use Pre-Deployed Test Contracts (Testing Only)
+
+✅ **Zero setup!** Use our pre-deployed contracts on local networks:
 
 ```typescript
 import { PRESETS } from 'avax-warp-pay';
-const warp = new Warp402(PRESETS.fuji);
+const warp = new Warp402({
+  ...PRESETS.local,
+  privateKey: process.env.PRIVATE_KEY
+});
 ```
 
-### Option 2: Deploy Your Own (Required for Production)
+⚠️ **Note**: These contracts are **placeholders for testing only**. Real Fuji/mainnet deployments require your own contracts or platform-provided addresses.
 
-You need:
-1. ✅ **WarpSender.sol** deployed on source chain
-2. ✅ **WarpReceiver.sol** deployed on destination chain
-3. ✅ Contracts configured to communicate
-4. ✅ RPC URLs and contract addresses
+---
 
-👉 **[Full Deployment Guide](https://github.com/jayasurya0007/wrap-x402/blob/main/DEPLOYMENT_GUIDE.md)**
+### Option 2: Use Platform-Provided Contracts (If Available)
 
-Quick deploy:
+If you're building on a **platform that has already deployed Warp-402 contracts**, they will provide you with:
+
+```typescript
+// Example: Platform provides these addresses
+const warp = new Warp402({
+  privateKey: process.env.PRIVATE_KEY,
+  senderChain: {
+    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
+    chainId: 43113,
+    blockchainId: "0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5",
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    sender: "0xPLATFORM_PROVIDED_SENDER_ADDRESS"  // ← Platform gives you this
+  },
+  receiverChain: {
+    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
+    chainId: 43113,
+    blockchainId: "0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5",
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    receiver: "0xPLATFORM_PROVIDED_RECEIVER_ADDRESS"  // ← Platform gives you this
+  }
+});
+```
+
+**Where to get these addresses:**
+- Check the platform's documentation
+- Ask in their Discord/support
+- Look for "Warp-402 Contract Addresses" section
+- Check their GitHub README
+
+---
+
+### Option 3: Deploy Your Own Contracts (Production)
+
+For **full control and production use**, deploy your own contracts:
+
+**What you need:**
+1. ✅ Foundry installed (`curl -L https://foundry.paradigm.xyz | bash`)
+2. ✅ Funded wallet with AVAX (~0.05 AVAX for deployment)
+3. ✅ RPC URLs for your target chains
+
+**Quick deploy:**
 ```bash
+# Clone contracts repository
 git clone https://github.com/jayasurya0007/wrap-x402.git
 cd wrap-x402/wrapx402
-forge script script/DeployWarpSender.s.sol --rpc-url $RPC --broadcast
+
+# Install dependencies
+forge install
+
+# Set your private key (⚠️ use testnet key only!)
+export PRIVATE_KEY="0x..."
+
+# Deploy WarpSender on source chain
+forge script script/DeployWarpSender.s.sol \
+  --rpc-url https://api.avax-test.network/ext/bc/C/rpc \
+  --broadcast
+
+# ✅ Copy the deployed WarpSender address
+
+# Deploy WarpReceiver on destination chain  
+forge script script/DeployWarpReceiver.s.sol \
+  --rpc-url https://api.avax-test.network/ext/bc/C/rpc \
+  --broadcast
+
+# ✅ Copy the deployed WarpReceiver address
+
+# Configure contracts (link sender to receiver)
+export SENDER_ADDRESS="0x..."  # From step above
+export RECEIVER_ADDRESS="0x..." # From step above
+export REMOTE_BLOCKCHAIN_ID="0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5"
+
+forge script script/ConfigureSender.s.sol \
+  --rpc-url https://api.avax-test.network/ext/bc/C/rpc \
+  --broadcast
 ```
+
+**Now use your deployed addresses:**
+```typescript
+const warp = new Warp402({
+  privateKey: process.env.PRIVATE_KEY,
+  senderChain: {
+    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
+    chainId: 43113,
+    blockchainId: "0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5",
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    sender: process.env.SENDER_ADDRESS  // ← Your deployed address
+  },
+  receiverChain: {
+    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
+    chainId: 43113,
+    blockchainId: "0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5",
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    receiver: process.env.RECEIVER_ADDRESS  // ← Your deployed address
+  }
+});
+```
+
+👉 **[Complete Deployment Guide](https://github.com/jayasurya0007/wrap-x402/blob/main/wrapx402/document.md)**
+
+---
+
+### 🤔 Which Option Should I Use?
+
+| Scenario | Recommended Option |
+|----------|-------------------|
+| **Just testing the SDK** | Option 1: Use PRESETS.local |
+| **Building on a platform with Warp-402** | Option 2: Use platform-provided addresses |
+| **Production app / Full control needed** | Option 3: Deploy your own contracts |
+| **Testing on Fuji testnet** | Option 3: Deploy your own (no public Fuji contracts yet) |
 
 ---
 
@@ -695,6 +911,47 @@ forge script script/DeployWarpReceiver.s.sol --rpc-url $SUBNET_B_RPC_URL --broad
 forge script script/ConfigureSender.s.sol --rpc-url $SUBNET_A_RPC_URL --broadcast
 ```
 
+### Troubleshooting Deployment Errors
+
+#### Error: "not found contracts/TeleporterInterfaces.sol"
+
+This means you're missing the interface files. **Solution:**
+
+```bash
+# Make sure you cloned the full repository
+git clone https://github.com/jayasurya0007/wrap-x402.git
+cd wrap-x402/wrapx402
+
+# Verify the file exists
+ls -la src/TeleporterInterfaces.sol
+
+# If missing, ensure you're in the correct directory
+pwd  # Should show: .../wrap-x402/wrapx402
+
+# Install dependencies
+forge install
+
+# Try building
+forge build
+```
+
+The contracts require these files in `src/`:
+- ✅ `TeleporterInterfaces.sol` - Teleporter interfaces
+- ✅ `WarpSender.sol` - Payment sender contract
+- ✅ `WarpReceiver.sol` - Payment receiver contract
+
+#### Error: "Receiver not set"
+
+Your contracts aren't configured. Run:
+```bash
+forge script script/ConfigureSender.s.sol --rpc-url $RPC --broadcast
+```
+
+#### Error: "Insufficient funds"
+
+You need AVAX for gas. Get testnet AVAX from:
+- 🚰 **Fuji Faucet**: https://faucet.avax.network/
+
 ### Cost Estimates
 
 **Deployment (one-time)**:
@@ -708,7 +965,7 @@ forge script script/ConfigureSender.s.sol --rpc-url $SUBNET_A_RPC_URL --broadcas
 - Verify/consume: ~0.001 AVAX
 - **Total: ~0.003 AVAX per payment** (~$0.10)
 
-👉 **[Complete Deployment Guide](https://github.com/jayasurya0007/wrap-x402/blob/main/DEPLOYMENT_GUIDE.md)**
+👉 **[Complete Deployment Guide](https://github.com/jayasurya0007/wrap-x402/blob/main/wrapx402/document.md)**
 
 ---
 
@@ -716,14 +973,50 @@ forge script script/ConfigureSender.s.sol --rpc-url $SUBNET_A_RPC_URL --broadcas
 
 ### Q: Do I need to deploy contracts to use this SDK?
 
-**A: NO, not for testing!** Use our pre-deployed contracts on Fuji testnet:
+**A: It depends on your use case:**
+
+- ✅ **Testing locally**: Use `PRESETS.local` (no deployment needed)
+- ✅ **Building on a platform**: Platform provides contract addresses
+- ❌ **Production on Fuji/Mainnet**: You must deploy your own contracts
 
 ```typescript
+// Testing - no deployment needed
 import { PRESETS } from 'avax-warp-pay';
-const warp = new Warp402(PRESETS.local);
+const warp = new Warp402({ ...PRESETS.local, privateKey: '0x...' });
+
+// Production - use your deployed addresses
+const warp = new Warp402({
+  privateKey: '0x...',
+  senderChain: { /* ... */ sender: '0xYOUR_DEPLOYED_SENDER' },
+  receiverChain: { /* ... */ receiver: '0xYOUR_DEPLOYED_RECEIVER' }
+});
 ```
 
-**For production**, you should deploy your own contracts for security and control.
+### Q: Where do I get contract addresses for Fuji/Mainnet?
+
+**A: You have 3 options:**
+
+1. **Deploy your own** (see "Deploying Your Own Contracts" section above)
+2. **Use platform-provided addresses** (if building on a platform with Warp-402)
+3. **Use community-deployed contracts** (if someone shares verified addresses)
+
+Currently, there are **no official public contracts on Fuji/Mainnet** - you must deploy your own.
+
+### Q: How do I know if a platform has Warp-402 contracts deployed?
+
+**A: Check their documentation for:**
+- "Warp-402 Contract Addresses" section
+- "Cross-Chain Payment Addresses"
+- `WarpSender` and `WarpReceiver` addresses
+
+**Example from platform docs:**
+```
+Our Warp-402 Contracts (Fuji):
+- WarpSender: 0x1234...5678
+- WarpReceiver: 0xabcd...ef01
+```
+
+If not documented, ask in their Discord/support.
 
 ### Q: What networks are supported?
 
@@ -740,14 +1033,35 @@ const warp = new Warp402(PRESETS.local);
 - Teleporter relayer speed
 - Number of validator signatures required
 
-### Q: Can I use pre-deployed contracts?
+### Q: Can I use someone else's deployed contracts?
 
-**A: YES!** You can use:
-- Our official pre-deployed contracts (for testing)
-- Anyone else's deployed contracts (if they share addresses)
+**A: YES!** As long as you have:
+- ✅ Contract addresses (sender + receiver)
+- ✅ RPC URLs for both chains
+- ✅ Blockchain IDs (hex format)
 
-Just need:
-- Contract addresses
+Just configure the SDK with those addresses:
+```typescript
+const warp = new Warp402({
+  privateKey: process.env.PRIVATE_KEY,
+  senderChain: {
+    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
+    chainId: 43113,
+    blockchainId: "0x7fc93d85...",
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    sender: "0xSOMEONE_ELSES_SENDER_ADDRESS"
+  },
+  receiverChain: {
+    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
+    chainId: 43113,
+    blockchainId: "0x7fc93d85...",
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    receiver: "0xSOMEONE_ELSES_RECEIVER_ADDRESS"
+  }
+});
+```
+
+⚠️ **Security Note**: Only use contracts you trust! Verify them on [Snowtrace](https://testnet.snowtrace.io)
 - RPC URLs
 - Private key with funds
 
@@ -811,8 +1125,8 @@ avax-warp-pay/
 
 | Network | Chain ID | Blockchain ID | Teleporter |
 |---------|----------|---------------|------------|
-| **Fuji C-Chain** | 43113 | `0x7fc93d...` | ✅ |
-| **Avalanche Mainnet** | 43114 | `0x9b09d...` | ✅ |
+| **Fuji C-Chain** | 43113 | `0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5` | ✅ |
+| **Avalanche Mainnet** | 43114 | `0x9b09de77f3c672e17b9e09ce6f1e33a6c0b82b9f78c3298d1353049f387bcf5d` | ✅ |
 | **Custom Subnets** | Any | Custom | ✅ |
 | **Local Networks** | Any | Custom | ✅ |
 
