@@ -68,10 +68,47 @@ Traditional payment systems are locked to single chains. Warp-402 breaks this ba
 
 ## 🚀 Quick Start
 
+### Option 1: Use the Published SDK (Recommended)
+
+**If you just want to use the payment system:**
+
+```bash
+npm install avax-warp-pay
+```
+
+**⚠️ IMPORTANT**: You need deployed contract addresses! See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for instructions.
+
+Quick example:
+```javascript
+import { Warp402 } from 'avax-warp-pay';
+
+const warp = new Warp402({
+  privateKey: "YOUR_KEY",
+  senderChain: { 
+    rpc: "...", 
+    sender: "0xYourDeployedWarpSender..." // ← Must deploy first!
+  },
+  receiverChain: { 
+    rpc: "...", 
+    receiver: "0xYourDeployedWarpReceiver..." // ← Must deploy first!
+  }
+});
+
+await warp.pay(ethers.parseEther("1"));
+```
+
+📚 **Full SDK Documentation**: [wrap402-sdk/README.md](wrap402-sdk/README.md)
+
+---
+
+### Option 2: Full Project Setup (For Development)
+
+**If you want to deploy contracts and develop:**
+
 ### Prerequisites
 
 - Node.js 18+
-- Foundry (for contracts)
+- Foundry (for contract deployment)
 - Avalanche CLI (for local testing)
 - Private key with test AVAX
 

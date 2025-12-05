@@ -18,5 +18,8 @@ export * from './types';
 // Utilities
 export * from './utils';
 
+// Pre-configured network presets
+export { PRESETS, DEPLOYED_CONTRACTS, withPrivateKey } from './utils/presets';
+
 // Version
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.3';

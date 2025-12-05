@@ -19,7 +19,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VERSION = exports.Config = exports.ReceiverClient = exports.SenderClient = exports.Warp402 = void 0;
+exports.VERSION = exports.withPrivateKey = exports.DEPLOYED_CONTRACTS = exports.PRESETS = exports.Config = exports.ReceiverClient = exports.SenderClient = exports.Warp402 = void 0;
 // Main SDK class
 var Warp402_1 = require("./core/Warp402");
 Object.defineProperty(exports, "Warp402", { enumerable: true, get: function () { return Warp402_1.Warp402; } });
@@ -34,6 +34,11 @@ Object.defineProperty(exports, "Config", { enumerable: true, get: function () { 
 __exportStar(require("./types"), exports);
 // Utilities
 __exportStar(require("./utils"), exports);
+// Pre-configured network presets
+var presets_1 = require("./utils/presets");
+Object.defineProperty(exports, "PRESETS", { enumerable: true, get: function () { return presets_1.PRESETS; } });
+Object.defineProperty(exports, "DEPLOYED_CONTRACTS", { enumerable: true, get: function () { return presets_1.DEPLOYED_CONTRACTS; } });
+Object.defineProperty(exports, "withPrivateKey", { enumerable: true, get: function () { return presets_1.withPrivateKey; } });
 // Version
-exports.VERSION = '1.0.0';
+exports.VERSION = '1.0.3';
 //# sourceMappingURL=index.js.map

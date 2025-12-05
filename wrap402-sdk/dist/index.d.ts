@@ -9,5 +9,6 @@ export { ReceiverClient } from './core/ReceiverClient';
 export { Config } from './core/Config';
 export * from './types';
 export * from './utils';
-export declare const VERSION = "1.0.0";
+export { PRESETS, DEPLOYED_CONTRACTS, withPrivateKey } from './utils/presets';
+export declare const VERSION = "1.0.3";
 //# sourceMappingURL=index.d.ts.map
