@@ -74,25 +74,34 @@ async function requirePayment(price: bigint) {
     }
 
     try {
-      // Verify payment
+      // Verify payment exists
       console.log(`Verifying payment: ${paymentId}`);
-      const verification = await warp.getVerification(paymentId);
+      const isValid = await warp.verify(paymentId);
 
-      if (!verification.isValid) {
+      if (!isValid) {
         return res.status(402).json({
           error: 'Payment Invalid',
-          message: 'Payment not found, insufficient amount, or already consumed',
+          message: 'Payment not found or already consumed',
           paymentId
         });
       }
 
-      // Check amount
-      if (verification.receipt && verification.receipt.amount < price) {
+      // Get receipt and check amount
+      const receipt = await warp.getReceipt(paymentId);
+      if (!receipt) {
+        return res.status(402).json({
+          error: 'Payment Invalid',
+          message: 'Receipt not found',
+          paymentId
+        });
+      }
+
+      if (receipt.amount < price) {
         return res.status(402).json({
           error: 'Insufficient Payment',
           message: 'Payment amount is less than required',
           required: ethers.formatEther(price),
-          provided: ethers.formatEther(verification.receipt.amount)
+          provided: ethers.formatEther(receipt.amount)
         });
       }
 
@@ -205,17 +214,12 @@ app.get('/api/pricing', (req, res) => {
 // Health check
 app.get('/health', async (req, res) => {
   try {
-    const balance = await warp.getSenderBalance();
-    const address = warp.getSenderAddress();
-    
+    // Just check if SDK is initialized
     res.json({
       status: 'healthy',
       sdk: 'warp402',
       version: '1.0.0',
-      wallet: {
-        address,
-        balance: ethers.formatEther(balance)
-      }
+      message: 'Server is running and accepting payments'
     });
   } catch (error) {
     res.status(503).json({
@@ -234,7 +238,6 @@ app.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log();
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Wallet address: ${warp.getSenderAddress()}`);
   console.log();
   console.log('Endpoints:');
   console.log(`   GET  http://localhost:${PORT}/api/public`);

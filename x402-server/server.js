@@ -12,18 +12,57 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Network configurations
+const NETWORKS = {
+  local: {
+    name: 'Local Network',
+    rpcUrl: 'http://127.0.0.1:9650/ext/bc/2fEmFBdd2Dfjh6nmrTjGTGNbnCb86moNHvCtrdP5bJxpftSEXA/rpc',
+    chainIdA: '1001',
+    chainIdB: '1002',
+    receiverAddress: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922',
+    senderAddress: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922',
+    description: 'Local Avalanche subnet deployment'
+  },
+  fuji: {
+    name: 'Fuji Testnet',
+    rpcUrl: 'https://api.avax-test.network/ext/bc/C/rpc',
+    chainIdA: '43113',
+    chainIdB: '43113',
+    receiverAddress: '0x2A3E54D66c78cB58052B8eAb677c973814Bc8A3f',
+    senderAddress: '0x0d45537c1DA893148dBB113407698E20CfA2eE56',
+    description: 'Fuji C-Chain testnet deployment'
+  }
+};
+
+// Load configuration from environment with network selection
+const NETWORK_ENV = process.env.NETWORK || 'local';
+const currentNetwork = NETWORKS[NETWORK_ENV];
+
+if (!currentNetwork) {
+  console.error(`❌ Invalid NETWORK value: ${NETWORK_ENV}`);
+  console.error(`   Available networks: ${Object.keys(NETWORKS).join(', ')}`);
+  process.exit(1);
+}
+
 // Initialize Express app
 const app = express();
-app.use(cors());
+
+// Enhanced CORS configuration
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json());
 
-// Configuration
+// Configuration - Use environment variables first, fall back to network defaults
 const PORT = process.env.PORT || 3000;
-const SUBNET_B_RPC_URL = process.env.SUBNET_B_RPC_URL;
-const WARP_RECEIVER_ADDRESS = process.env.WARP_RECEIVER_ADDRESS;
-const WARP_SENDER_ADDRESS = process.env.WARP_SENDER_ADDRESS;
-const SUBNET_A_CHAIN_ID = process.env.SUBNET_A_CHAIN_ID;
-const SUBNET_B_CHAIN_ID = process.env.SUBNET_B_CHAIN_ID;
+const SUBNET_B_RPC_URL = process.env.SUBNET_B_RPC_URL || currentNetwork.rpcUrl;
+const WARP_RECEIVER_ADDRESS = process.env.WARP_RECEIVER_ADDRESS || currentNetwork.receiverAddress;
+const WARP_SENDER_ADDRESS = process.env.WARP_SENDER_ADDRESS || currentNetwork.senderAddress;
+const SUBNET_A_CHAIN_ID = process.env.SUBNET_A_CHAIN_ID || currentNetwork.chainIdA;
+const SUBNET_B_CHAIN_ID = process.env.SUBNET_B_CHAIN_ID || currentNetwork.chainIdB;
 const DEFAULT_PAYMENT_AMOUNT_WEI = process.env.DEFAULT_PAYMENT_AMOUNT_WEI;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
@@ -255,7 +294,7 @@ app.post('/consume/:paymentId', async (req, res) => {
 
 /**
  * GET /health
- * Health check endpoint
+ * Health check endpoint with network information
  */
 app.get('/health', async (req, res) => {
   try {
@@ -268,6 +307,11 @@ app.get('/health', async (req, res) => {
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
+      network: {
+        environment: NETWORK_ENV,
+        name: currentNetwork.name,
+        description: currentNetwork.description
+      },
       blockchain: {
         connected: true,
         blockNumber: blockNumber,
@@ -286,7 +330,11 @@ app.get('/health', async (req, res) => {
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message
+      error: error.message,
+      network: {
+        environment: NETWORK_ENV,
+        name: currentNetwork.name
+      }
     });
   }
 });
@@ -319,8 +367,13 @@ app.listen(PORT, () => {
   console.log('');
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log('');
-  console.log('📡 Configuration:');
-  console.log(`   Subnet B RPC: ${SUBNET_B_RPC_URL}`);
+  console.log('🌐 Network Configuration:');
+  console.log(`   Environment:  ${NETWORK_ENV.toUpperCase()}`);
+  console.log(`   Network:      ${currentNetwork.name}`);
+  console.log(`   Description:  ${currentNetwork.description}`);
+  console.log('');
+  console.log('📡 Blockchain Configuration:');
+  console.log(`   RPC URL:      ${SUBNET_B_RPC_URL}`);
   console.log(`   WarpReceiver: ${WARP_RECEIVER_ADDRESS}`);
   console.log(`   WarpSender:   ${WARP_SENDER_ADDRESS}`);
   console.log(`   Chain IDs:    ${SUBNET_A_CHAIN_ID} → ${SUBNET_B_CHAIN_ID}`);
@@ -330,6 +383,7 @@ app.listen(PORT, () => {
   console.log(`   GET  http://localhost:${PORT}/verify/:paymentId`);
   console.log(`   POST http://localhost:${PORT}/consume/:paymentId`);
   console.log(`   GET  http://localhost:${PORT}/health`);
+  console.log(`   GET  http://localhost:${PORT}/`);
   console.log('');
   console.log('✨ Ready to accept payment requests!');
   console.log('');

@@ -95,9 +95,25 @@ Copy `.env.example` to `.env` and update values:
 cp .env.example .env
 ```
 
+**Network Selection:**
+
+The server now supports environment-based network switching:
+- `NETWORK=local` - Local Avalanche subnet deployment (default)
+- `NETWORK=fuji` - Fuji C-Chain testnet
+
+Each network has preset configurations that can be overridden with specific environment variables.
+
 **Environment Variables:**
 
 ```env
+# Network Selection (Required)
+NETWORK=local  # Options: 'local' or 'fuji'
+
+# Server Configuration
+PORT=3000
+CORS_ORIGIN=*
+
+# Optional: Override network defaults
 # Server Configuration
 PORT=3000
 
