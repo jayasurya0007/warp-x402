@@ -1,0 +1,25 @@
+{
+  "name": "avax-warp-pay-examples",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Example project demonstrating avax-warp-pay SDK usage",
+  "scripts": {
+    "quickstart": "ts-node examples/quickstart.ts",
+    "deploy": "ts-node examples/1-deploy-contracts.ts",
+    "send": "ts-node examples/2-send-payment.ts",
+    "verify": "ts-node examples/3-verify-payment.ts",
+    "api": "ts-node examples/complete-api-reference.ts",
+    "workflows": "ts-node examples/payment-workflows.ts",
+    "errors": "ts-node examples/error-handling.ts"
+  },
+  "keywords": ["avalanche", "warp", "payment", "cross-chain", "example"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^24.10.1",
+    "avax-warp-pay": "^2.2.0",
+    "ethers": "^6.16.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
