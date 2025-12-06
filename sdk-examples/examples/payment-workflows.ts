@@ -14,22 +14,23 @@ const config = {
     rpc: 'http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc',
     chainId: 1001,
     blockchainId: '0x' + 'a'.repeat(64),
-    messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
-    sender: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922'
+    messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf'
   },
   receiverChain: {
-    rpc: 'http://127.0.0.1:9650/ext/bc/2M9tKWM1UqnFWzDauYnT6xUSaTbvLAMcJpWo9ZGR7CkYdamHDD/rpc',
+    rpc: 'http://127.0.0.1:9652/ext/bc/2ebnxs92JxZpqhv5wUWZ5TExBVVaUG5xxBjd3wbm6PeuYJ6Un5/rpc',
     chainId: 1002,
     blockchainId: '0x' + 'b'.repeat(64),
-    messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
-    receiver: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922'
+    messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf'
   }
 };
 
 async function main() {
   console.log('Payment Workflow Examples\n');
 
-  const warp = Warp402Factory.fromExisting(config);
+  // Deploy fresh contracts for this demo
+  console.log('[INFO] 📦 Deploying contracts for workflows demo...\n');
+  const warp = await Warp402Factory.quickSetup(config);
+  console.log('[INFO] ✅ Contracts deployed and ready\n');
 
   // ============================================================
   // Workflow 1: Simple Payment

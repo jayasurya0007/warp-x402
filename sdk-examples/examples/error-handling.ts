@@ -54,7 +54,7 @@ async function main() {
       sender: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922'
     },
     receiverChain: {
-      rpc: 'http://127.0.0.1:9650/ext/bc/2M9tKWM1UqnFWzDauYnT6xUSaTbvLAMcJpWo9ZGR7CkYdamHDD/rpc',
+      rpc: 'http://127.0.0.1:9652/ext/bc/2ebnxs92JxZpqhv5wUWZ5TExBVVaUG5xxBjd3wbm6PeuYJ6Un5/rpc',
       chainId: 1002,
       blockchainId: '0x' + 'b'.repeat(64),
       messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
@@ -93,7 +93,7 @@ async function main() {
         sender: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922'
       },
       receiverChain: {
-        rpc: 'http://127.0.0.1:9650/ext/bc/2M9tKWM1UqnFWzDauYnT6xUSaTbvLAMcJpWo9ZGR7CkYdamHDD/rpc',
+        rpc: 'http://127.0.0.1:9652/ext/bc/2ebnxs92JxZpqhv5wUWZ5TExBVVaUG5xxBjd3wbm6PeuYJ6Un5/rpc',
         chainId: 1002,
         blockchainId: '0x' + 'b'.repeat(64),
         messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
