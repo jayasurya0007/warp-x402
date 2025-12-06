@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-12-06T11:09:58.181Z",
+  "duration": "18.07s",
+  "network": "local",
+  "sender": {
+    "chain": "SubnetA",
+    "chainId": 1001,
+    "address": "0x52C84043CD9c865236f11d9Fc9F56aa003c1f922",
+    "rpc": "http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc"
+  },
+  "receiver": {
+    "chain": "SubnetB",
+    "chainId": 1002,
+    "address": "0x52C84043CD9c865236f11d9Fc9F56aa003c1f922",
+    "rpc": "http://127.0.0.1:9650/ext/bc/2M9tKWM1UqnFWzDauYnT6xUSaTbvLAMcJpWo9ZGR7CkYdamHDD/rpc"
+  }
+}

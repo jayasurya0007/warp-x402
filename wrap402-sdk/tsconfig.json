@@ -31,7 +31,9 @@
     "src/utils/contracts.ts",
     "src/utils/encoding.ts",
     "src/utils/logger.ts",
-    "src/utils/uuid.ts"
+    "src/utils/uuid.ts",
+    "src/cli/index.ts",
+    "src/cli/deploy.ts"
   ],
   "exclude": [
     "node_modules",

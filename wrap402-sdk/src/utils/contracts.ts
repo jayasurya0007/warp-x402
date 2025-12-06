@@ -3,13 +3,15 @@
  */
 
 export const WarpSenderABI = [
+  // Constructor
+  "constructor(address _messenger)",
+  
   // Core payment functions
   "function sendPayment(bytes32 paymentId) payable",
   "function sendMessage(string message) payable",
   
   // Configuration functions (owner only)
   "function setRemoteReceiver(bytes32 _remoteBlockchainId, address _remoteReceiver)",
-  "function setGasLimits(uint256 _messageGasLimit, uint256 _paymentGasLimit)",
   
   // Fund management (owner only)
   "function withdraw()",
@@ -37,6 +39,9 @@ export const WarpSenderABI = [
 ];
 
 export const WarpReceiverABI = [
+  // Constructor
+  "constructor(address _messenger)",
+  
   // Payment query functions
   "function hasPaid(bytes32 paymentId) view returns (bool)",
   "function getReceipt(bytes32 paymentId) view returns (tuple(bytes32 paymentId, uint256 amount, address payer, uint256 timestamp, bool consumed))",

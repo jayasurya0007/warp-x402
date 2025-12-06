@@ -4,6 +4,9 @@
   "description": "Cross-chain payment receipt SDK for Avalanche Subnets using Teleporter",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "avax-warp-pay": "./dist/cli/index.js"
+  },
   "files": [
     "dist",
     "scripts",
@@ -20,6 +23,8 @@
     "test:local": "ts-node test/integration-local.ts",
     "test:fuji": "ts-node test/integration-fuji.ts",
     "test:all": "npm run test:unit && npm run test:errors",
+    "test:deployment": "ts-node test-deployment.ts",
+    "test:deployment:structure": "ts-node test-deployment-structure.ts",
     "example:local": "ts-node examples/local-demo.ts",
     "example:fuji": "ts-node examples/fuji-demo.ts",
     "example:cross": "ts-node examples/cross-subnet-demo.ts",
@@ -51,10 +56,11 @@
   },
   "homepage": "https://github.com/jayasurya0007/wrap-x402#readme",
   "dependencies": {
+    "commander": "^14.0.2",
     "ethers": "^6.9.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.25",
     "@types/ws": "^8.18.1",
     "ts-node": "^10.9.0",
     "typescript": "^5.0.0"

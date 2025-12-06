@@ -12,6 +12,10 @@ export { SenderClient } from './core/SenderClient';
 export { ReceiverClient } from './core/ReceiverClient';
 export { Config } from './core/Config';
 
+// Deployment automation
+export { Warp402Factory } from './deploy/Warp402Factory';
+export { ContractDeployer } from './deploy/ContractDeployer';
+
 // Types
 export * from './types';
 
@@ -22,4 +26,4 @@ export * from './utils';
 export { PRESETS, DEPLOYED_CONTRACTS, withPrivateKey } from './utils/presets';
 
 // Version
-export const VERSION = '1.0.3';
+export const VERSION = '1.0.4';

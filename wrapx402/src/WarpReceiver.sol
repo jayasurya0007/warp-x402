@@ -2,10 +2,9 @@
 pragma solidity ^0.8.18;
 
 import {ITeleporterReceiver} from "./TeleporterInterfaces.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import {Owned} from "./Owned.sol";
 
-contract WarpReceiver is ITeleporterReceiver, Ownable, Pausable {
+contract WarpReceiver is ITeleporterReceiver, Owned {
     address public immutable MESSENGER;
     
     // Payment receipt structure
@@ -50,7 +49,7 @@ contract WarpReceiver is ITeleporterReceiver, Ownable, Pausable {
     event RequiredAmountUpdated(uint256 newAmount);
     event PaymentExpiryUpdated(uint256 newExpiry);
 
-    constructor(address _messenger) Ownable(msg.sender) {
+    constructor(address _messenger) {
         MESSENGER = _messenger;
         requiredPaymentAmount = 0; // Default: no minimum required
     }
@@ -79,16 +78,6 @@ contract WarpReceiver is ITeleporterReceiver, Ownable, Pausable {
     function setPaymentExpiryTime(uint256 _expiryTime) external onlyOwner {
         paymentExpiryTime = _expiryTime;
         emit PaymentExpiryUpdated(_expiryTime);
-    }
-    
-    // Emergency pause (owner only)
-    function pause() external onlyOwner {
-        _pause();
-    }
-    
-    // Unpause (owner only)
-    function unpause() external onlyOwner {
-        _unpause();
     }
 
     // Check if payment has been made
@@ -136,7 +125,7 @@ contract WarpReceiver is ITeleporterReceiver, Ownable, Pausable {
     }
 
     // Consume a payment (mark as used)
-    function consumePayment(bytes32 paymentId) external whenNotPaused {
+    function consumePayment(bytes32 paymentId) external {
         require(hasPaid(paymentId), "Payment not found");
         require(!isConsumed(paymentId), "Payment already consumed");
         require(!isExpired(paymentId), "Payment has expired");
@@ -151,7 +140,7 @@ contract WarpReceiver is ITeleporterReceiver, Ownable, Pausable {
         bytes32 originBlockchainID,
         address originSenderAddress,
         bytes calldata message
-    ) external override onlyTeleporter whenNotPaused {
+    ) external override onlyTeleporter {
         // Validate origin chain ID matches approved source
         require(
             approvedSourceBlockchainId == bytes32(0) || originBlockchainID == approvedSourceBlockchainId,

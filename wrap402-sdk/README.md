@@ -9,6 +9,38 @@
 
 ---
 
+## 📚 Quick Navigation
+
+| Section | What You'll Learn |
+|---------|-------------------|
+| **[🎯 What Does This SDK Do?](#-what-does-this-sdk-do)** | Understand in 30 seconds |
+| **[🚀 Quickstart](#-quickstart--zero-deployment-needed)** | Start coding in 2 minutes |
+| **[💡 How It Works](#-how-it-works---simple-3-step-flow)** | Visual flow diagram |
+| **[🚀 Deploy Contracts](#-deploying-your-own-contracts)** | 3 easy deployment methods |
+| **[❓ FAQ](#-faq)** | Common questions answered |
+
+---
+
+## 🎯 What Does This SDK Do?
+
+**In Simple Terms:** Accept payments on Chain A, verify them on Chain B — without users bridging tokens!
+
+```typescript
+// 1. User pays on Chain A
+const paymentId = await warp.pay(ethers.parseEther("0.1"));
+
+// 2. Wait for cross-chain relay (~30 seconds)
+await new Promise(r => setTimeout(r, 30000));
+
+// 3. Verify payment on Chain B → unlock content
+const verified = await warp.verify(paymentId);
+if (verified) unlockPremiumContent();
+```
+
+**That's it!** The SDK handles all the cross-chain complexity for you.
+
+---
+
 ## 🚀 Quickstart — ZERO Deployment Needed!
 
 ```bash
@@ -41,6 +73,98 @@ console.log("✅ Verified:", verified);
 
 > 💰 **Get testnet AVAX**: https://faucet.avax.network/
 > 📘 **Deploy Guide**: See [Deploying Your Own Contracts](#deploying-your-own-contracts)
+
+---
+
+## 💡 How It Works - Simple 3-Step Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  What This SDK Does For You                     │
+└─────────────────────────────────────────────────────────────────┘
+
+                    YOUR APPLICATION FLOW
+                    
+Step 1: SEND PAYMENT                Chain A (Sender)
+─────────────────────────           ┌──────────────┐
+User pays on Chain A                │   Customer   │
+                                    │   Pays 0.1   │
+const paymentId = await             │     AVAX     │
+  warp.pay(                         └──────┬───────┘
+    ethers.parseEther("0.1")               │
+  );                                       ↓ SDK handles this
+                                    ┌──────────────┐
+✅ Returns: Payment ID              │ WarpSender   │
+   "0xabc123..."                    │  Contract    │
+                                    └──────┬───────┘
+                                           │
+                                           │ Teleporter
+                                           │ Warp Message
+                                           ↓
+
+Step 2: WAIT FOR RELAY             Cross-Chain Magic ✨
+─────────────────────────           (15-30 seconds)
+Avalanche Teleporter                
+automatically relays                Teleporter Relayers
+the payment proof                   pass the message
+                                    between chains
+await new Promise(
+  r => setTimeout(r, 30000)         
+);                                         │
+                                           │
+                                           ↓
+
+Step 3: VERIFY & USE                Chain B (Receiver)
+─────────────────────────           ┌──────────────┐
+Check payment on Chain B            │ WarpReceiver │
+Unlock content/service              │   Contract   │
+                                    └──────┬───────┘
+const verified = await                     │
+  warp.verify(paymentId);                  ↓ SDK checks this
+                                    ┌──────────────┐
+if (verified) {                     │  Payment     │
+  unlockContent();                  │  Verified ✅ │
+}                                   └──────────────┘
+                                           │
+✅ Returns: true/false                     ↓
+                                    Your app unlocks
+                                    premium content!
+```
+
+### Real-World Use Case
+
+**Scenario:** Content Platform on Chain B, Users Pay on Chain A
+
+```typescript
+// On your server (Chain B)
+app.post('/api/access-premium-video', async (req, res) => {
+  const { paymentId } = req.body;
+  
+  // User paid on Chain A, verify on Chain B
+  const verified = await warp.verify(paymentId);
+  
+  if (verified) {
+    // Payment confirmed! Give access
+    return res.json({
+      videoUrl: 'https://cdn.example.com/premium-video.mp4',
+      accessGranted: true
+    });
+  } else {
+    return res.status(402).json({ error: 'Payment Required' });
+  }
+});
+```
+
+### Why This Is Powerful
+
+| Without Warp-402 | With Warp-402 SDK |
+|------------------|-------------------|
+| ❌ User needs wallet on Chain B | ✅ Pay on familiar Chain A |
+| ❌ Bridge tokens manually | ✅ Automatic cross-chain proof |
+| ❌ Complex smart contracts | ✅ Simple SDK methods |
+| ❌ 10+ minutes setup | ✅ 2 lines of code |
+
+**Bottom Line:** User pays on Chain A → Your app on Chain B knows about it → Unlock access!
 
 ---
 
@@ -195,6 +319,14 @@ See our [Deployment Guide](#deploying-your-own-contracts) below if you need:
 - Private subnet deployment
 - Mainnet deployment
 - Full ownership and control
+
+**We provide 3 easy deployment methods:**
+
+| Method | Time | Difficulty | Best For |
+|--------|------|------------|----------|
+| **[CLI Tool](#method-1-cli-deployment-recommended)** | 30 sec | ⭐ Easy | Quick setup, demos |
+| **[SDK Code](#method-2-programmatic-deployment-with-sdk)** | 30 sec | ⭐⭐ Medium | TypeScript projects |
+| **[Manual Foundry](#method-3-manual-deployment-with-foundry)** | 10 min | ⭐⭐⭐ Advanced | Full control |
 
 ---
 
@@ -937,31 +1069,750 @@ try {
 - ✅ **Private networks**: Deploy on your own subnets
 - ✅ **Security**: Dedicated contracts for your application
 
-### Quick Deployment
+---
+
+## 📋 Deployment Methods - Choose Your Path
+
+You have **3 ways** to deploy Warp-402 contracts. Choose based on your experience level and requirements:
+
+| Method | Best For | Time | Difficulty |
+|--------|----------|------|------------|
+| **[CLI Tool](#method-1-cli-deployment-recommended)** | Quick setup, demos, hackathons | ~30 sec | ⭐ Easy |
+| **[SDK Code](#method-2-programmatic-deployment-with-sdk)** | TypeScript projects, automation | ~30 sec | ⭐⭐ Medium |
+| **[Manual Foundry](#method-3-manual-deployment-with-foundry)** | Full control, customization | ~10 min | ⭐⭐⭐ Advanced |
+
+---
+
+### Method 1: CLI Deployment (Recommended) ✨
+
+**Perfect for:** Quick setup, testing, hackathons, demos
+
+**What it does:**
+1. Deploys WarpSender to sender chain
+2. Deploys WarpReceiver to receiver chain
+3. Configures cross-chain handshake automatically
+4. Outputs addresses to save in `.env` file
+
+**Requirements:**
+- ✅ Node.js installed
+- ✅ Private key with AVAX on both chains
+- ✅ RPC URLs for both chains
+
+#### Step 1: Install the SDK
 
 ```bash
-# Clone repository
-git clone https://github.com/jayasurya0007/wrap-x402.git
-cd wrap-x402/wrapx402
+npm install avax-warp-pay
+```
 
+#### Step 2: Run CLI Deployment
+
+```bash
+npx avax-warp-pay deploy \
+  --sender-rpc http://127.0.0.1:9650/ext/bc/C/rpc \
+  --sender-chain-id 43112 \
+  --sender-blockchain-id 0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5 \
+  --receiver-rpc http://127.0.0.1:9650/ext/bc/subnet/rpc \
+  --receiver-chain-id 99999 \
+  --receiver-blockchain-id 0xc063de20d9e6e3b3e5b0f5e1e8e7e6e5e4e3e2e1e0dfdedddcdbdad9d8d7d6d5 \
+  --private-key $PRIVATE_KEY
+```
+
+**Or use environment variables:**
+
+```bash
+# .env file
+PRIVATE_KEY=0x...
+SENDER_RPC=http://127.0.0.1:9650/ext/bc/C/rpc
+SENDER_CHAIN_ID=43112
+SENDER_BLOCKCHAIN_ID=0x7fc93d85...
+RECEIVER_RPC=http://127.0.0.1:9650/ext/bc/subnet/rpc
+RECEIVER_CHAIN_ID=99999
+RECEIVER_BLOCKCHAIN_ID=0xc063de20...
+
+# Run with environment variables
+npx avax-warp-pay deploy
+```
+
+#### Step 3: Save Contract Addresses
+
+The CLI will output:
+
+```
+╔════════════════════════════════════════════════════════════════════╗
+║                    ✅ DEPLOYMENT SUCCESSFUL!                       ║
+╚════════════════════════════════════════════════════════════════════╝
+
+⏱️  Deployment time: 18.43s
+
+📍 Contract Addresses:
+
+   WarpSender:
+   0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+
+   WarpReceiver:
+   0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+
+──────────────────────────────────────────────────────────────────────
+
+💾 Add these to your .env file:
+
+SENDER_ADDRESS=0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+RECEIVER_ADDRESS=0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+```
+
+#### Step 4: Use the Deployed Contracts
+
+```typescript
+import { Warp402 } from 'avax-warp-pay';
+
+const warp = new Warp402({
+  privateKey: process.env.PRIVATE_KEY!,
+  senderChain: {
+    rpc: process.env.SENDER_RPC!,
+    chainId: parseInt(process.env.SENDER_CHAIN_ID!),
+    blockchainId: process.env.SENDER_BLOCKCHAIN_ID!,
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    sender: process.env.SENDER_ADDRESS! // ← From CLI output
+  },
+  receiverChain: {
+    rpc: process.env.RECEIVER_RPC!,
+    chainId: parseInt(process.env.RECEIVER_CHAIN_ID!),
+    blockchainId: process.env.RECEIVER_BLOCKCHAIN_ID!,
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    receiver: process.env.RECEIVER_ADDRESS! // ← From CLI output
+  }
+});
+
+// Ready to use!
+await warp.pay(ethers.parseEther("0.1"));
+```
+
+**CLI Options:**
+
+```bash
+npx avax-warp-pay deploy --help
+
+OPTIONS:
+  --sender-rpc <url>              Sender chain RPC URL
+  --sender-chain-id <id>          Sender chain ID
+  --sender-blockchain-id <id>     Sender blockchain ID (hex)
+  --receiver-rpc <url>            Receiver chain RPC URL
+  --receiver-chain-id <id>        Receiver chain ID
+  --receiver-blockchain-id <id>   Receiver blockchain ID (hex)
+  --private-key <key>             Private key for deployment
+  --messenger <address>           ICM Messenger address (optional)
+  -h, --help                      Show this help message
+```
+
+---
+
+### Method 2: Programmatic Deployment with SDK
+
+**Perfect for:** TypeScript projects, automated deployments, CI/CD pipelines
+
+**What it does:** Same as CLI but from your TypeScript code
+
+#### Step 1: Create Deployment Script
+
+```typescript
+// deploy-once.ts
+import { Warp402Factory } from 'avax-warp-pay';
+
+async function deployContracts() {
+  console.log('🚀 Deploying Warp-402 contracts...\n');
+
+  const warp = await Warp402Factory.quickSetup({
+    privateKey: process.env.PRIVATE_KEY!,
+    
+    // Sender chain (e.g., SubnetA)
+    senderChain: {
+      rpc: 'http://127.0.0.1:9650/ext/bc/C/rpc',
+      chainId: 43112,
+      blockchainId: '0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5',
+      messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf' // Optional
+    },
+    
+    // Receiver chain (e.g., SubnetB)
+    receiverChain: {
+      rpc: 'http://127.0.0.1:9650/ext/bc/subnet/rpc',
+      chainId: 99999,
+      blockchainId: '0xc063de20d9e6e3b3e5b0f5e1e8e7e6e5e4e3e2e1e0dfdedddcdbdad9d8d7d6d5',
+      messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf' // Optional
+    }
+  });
+
+  // Get deployed addresses
+  const config = (warp as any).config;
+  console.log('✅ Deployment complete!\n');
+  console.log('SENDER_ADDRESS=' + config.senderChain.sender);
+  console.log('RECEIVER_ADDRESS=' + config.receiverChain.receiver);
+  console.log('\nAdd these to your .env file!');
+}
+
+deployContracts();
+```
+
+#### Step 2: Run Deployment Script
+
+```bash
+# Run once to deploy
+npx ts-node deploy-once.ts
+
+# Output:
+# SENDER_ADDRESS=0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+# RECEIVER_ADDRESS=0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+```
+
+#### Step 3: Save Addresses and Delete Script
+
+```bash
+# Add to .env file
+echo "SENDER_ADDRESS=0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e" >> .env
+echo "RECEIVER_ADDRESS=0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e" >> .env
+
+# Delete deployment script (don't need it anymore!)
+rm deploy-once.ts
+```
+
+#### Step 4: Use in Your Application
+
+```typescript
+// your-app.ts (This is your REAL application)
+import { Warp402 } from 'avax-warp-pay';
+
+// Just connect to existing contracts (NO deployment code!)
+const warp = new Warp402({
+  privateKey: process.env.PRIVATE_KEY!,
+  senderChain: {
+    rpc: "...",
+    chainId: 43112,
+    blockchainId: "0x7fc93d85...",
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    sender: process.env.SENDER_ADDRESS! // ← From .env
+  },
+  receiverChain: {
+    rpc: "...",
+    chainId: 99999,
+    blockchainId: "0xc063de20...",
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    receiver: process.env.RECEIVER_ADDRESS! // ← From .env
+  }
+});
+
+// Your business logic - runs forever
+app.post('/api/payment', async (req, res) => {
+  await warp.pay(ethers.parseEther("0.1"));
+  res.json({ success: true });
+});
+```
+
+**Alternative: Deploy Only (Without SDK Init)**
+
+If you just want contract addresses without initializing the SDK:
+
+```typescript
+import { Warp402Factory } from 'avax-warp-pay';
+
+const result = await Warp402Factory.deployOnly({
+  privateKey: process.env.PRIVATE_KEY!,
+  senderChain: { rpc, chainId, blockchainId },
+  receiverChain: { rpc, chainId, blockchainId }
+});
+
+console.log('Sender:', result.senderAddress);
+console.log('Receiver:', result.receiverAddress);
+console.log('Sender TX:', result.senderTxHash);
+console.log('Receiver TX:', result.receiverTxHash);
+```
+
+---
+
+### Method 3: Manual Deployment with Foundry
+
+**Perfect for:** Full control, custom configurations, advanced users
+
+**What it does:** Manual step-by-step deployment using Foundry CLI
+
+#### Prerequisites
+
+```bash
 # Install Foundry
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
-# Set environment variables
-export SUBNET_A_RPC_URL="https://api.avax-test.network/ext/bc/C/rpc"
-export SUBNET_B_RPC_URL="https://api.avax-test.network/ext/bc/C/rpc"
-export PRIVATE_KEY="0x..."
-
-# Deploy WarpSender on Chain A
-forge script script/DeployWarpSender.s.sol --rpc-url $SUBNET_A_RPC_URL --broadcast
-
-# Deploy WarpReceiver on Chain B
-forge script script/DeployWarpReceiver.s.sol --rpc-url $SUBNET_B_RPC_URL --broadcast
-
-# Configure contracts (MUST be done manually - SDK cannot do this)
-forge script script/ConfigureSender.s.sol --rpc-url $SUBNET_A_RPC_URL --broadcast
+# Clone repository
+git clone https://github.com/jayasurya0007/wrap-x402.git
+cd wrap-x402/wrapx402
 ```
+
+#### Step 1: Deploy WarpSender
+
+```bash
+# Set environment variables
+export SENDER_RPC="http://127.0.0.1:9650/ext/bc/C/rpc"
+export RECEIVER_RPC="http://127.0.0.1:9650/ext/bc/subnet/rpc"
+export PRIVATE_KEY="0x..."
+export MESSENGER="0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf"
+
+# Deploy WarpSender on sender chain
+forge create src/WarpSender.sol:WarpSender \
+  --rpc-url $SENDER_RPC \
+  --private-key $PRIVATE_KEY \
+  --constructor-args $MESSENGER
+
+# Output:
+# Deployed to: 0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+# Transaction hash: 0x632ec27f...
+
+# Save this address!
+export SENDER_ADDRESS="0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e"
+```
+
+#### Step 2: Deploy WarpReceiver
+
+```bash
+# Deploy WarpReceiver on receiver chain
+forge create src/WarpReceiver.sol:WarpReceiver \
+  --rpc-url $RECEIVER_RPC \
+  --private-key $PRIVATE_KEY \
+  --constructor-args $MESSENGER
+
+# Output:
+# Deployed to: 0x52C84043CD9c865236f11d9Fc9F56aa003c1f922
+# Transaction hash: 0xbe094c79...
+
+# Save this address!
+export RECEIVER_ADDRESS="0x52C84043CD9c865236f11d9Fc9F56aa003c1f922"
+```
+
+#### Step 3: Configure Cross-Chain Handshake
+
+```bash
+# Get blockchain IDs
+export SENDER_BLOCKCHAIN_ID="0x7fc93d85c6d62c5b2ac0b519c87010ea5294012d1e407030d6acd0021cac10d5"
+export RECEIVER_BLOCKCHAIN_ID="0xc063de20d9e6e3b3e5b0f5e1e8e7e6e5e4e3e2e1e0dfdedddcdbdad9d8d7d6d5"
+
+# Configure sender → receiver
+cast send $SENDER_ADDRESS \
+  "setRemoteReceiver(bytes32,address)" \
+  $RECEIVER_BLOCKCHAIN_ID \
+  $RECEIVER_ADDRESS \
+  --rpc-url $SENDER_RPC \
+  --private-key $PRIVATE_KEY
+
+# Configure receiver → sender
+cast send $RECEIVER_ADDRESS \
+  "setApprovedSender(bytes32,address)" \
+  $SENDER_BLOCKCHAIN_ID \
+  $SENDER_ADDRESS \
+  --rpc-url $RECEIVER_RPC \
+  --private-key $PRIVATE_KEY
+```
+
+#### Step 4: Verify Configuration
+
+```bash
+# Check sender configuration
+cast call $SENDER_ADDRESS "remoteReceiver()(address)" --rpc-url $SENDER_RPC
+# Should return: 0x52C84043CD9c865236f11d9Fc9F56aa003c1f922
+
+# Check receiver configuration
+cast call $RECEIVER_ADDRESS "approvedSender()(address)" --rpc-url $RECEIVER_RPC
+# Should return: 0x5aa01B3b5877255cE50cc55e8986a7a5fe29C70e
+```
+
+#### Step 5: Save to .env and Use in SDK
+
+```bash
+# Save to .env file
+cat >> .env << EOF
+SENDER_ADDRESS=$SENDER_ADDRESS
+RECEIVER_ADDRESS=$RECEIVER_ADDRESS
+SENDER_RPC=$SENDER_RPC
+RECEIVER_RPC=$RECEIVER_RPC
+SENDER_BLOCKCHAIN_ID=$SENDER_BLOCKCHAIN_ID
+RECEIVER_BLOCKCHAIN_ID=$RECEIVER_BLOCKCHAIN_ID
+EOF
+```
+
+Then use in your app:
+
+```typescript
+import { Warp402 } from 'avax-warp-pay';
+
+const warp = new Warp402({
+  privateKey: process.env.PRIVATE_KEY!,
+  senderChain: {
+    rpc: process.env.SENDER_RPC!,
+    chainId: 43112,
+    blockchainId: process.env.SENDER_BLOCKCHAIN_ID!,
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    sender: process.env.SENDER_ADDRESS!
+  },
+  receiverChain: {
+    rpc: process.env.RECEIVER_RPC!,
+    chainId: 99999,
+    blockchainId: process.env.RECEIVER_BLOCKCHAIN_ID!,
+    messenger: "0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf",
+    receiver: process.env.RECEIVER_ADDRESS!
+  }
+});
+```
+
+---
+
+## 📊 Deployment Comparison
+
+| Feature | CLI | SDK Code | Manual Foundry |
+|---------|-----|----------|----------------|
+| **Time** | ~30 sec | ~30 sec | ~10 min |
+| **Commands** | 1 command | 1 script | 5+ commands |
+| **Auto-configure** | ✅ Yes | ✅ Yes | ❌ Manual |
+| **Customization** | ⭐ Basic | ⭐⭐ Medium | ⭐⭐⭐ Full |
+| **Requirements** | Node.js | Node.js + TS | Foundry + Git |
+| **Best for** | Quick setup | TypeScript apps | Advanced users |
+
+---
+
+## 💡 Understanding the Deployment Process
+
+### What Happens During Deployment?
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Deployment Process                       │
+└─────────────────────────────────────────────────────────────┘
+
+Step 1: Deploy WarpSender              Step 2: Deploy WarpReceiver
+────────────────────────────────      ────────────────────────────────
+Chain A                                Chain B
+┌──────────────┐                      ┌──────────────┐
+│              │                      │              │
+│ WarpSender   │                      │ WarpReceiver │
+│              │                      │              │
+│ Not          │                      │ Not          │
+│ configured   │                      │ configured   │
+└──────────────┘                      └──────────────┘
+      ↓                                      ↓
+Deployment cost: ~$2.80               Deployment cost: ~$2.98
+
+
+Step 3: Configure Handshake (Cross-Chain Connection)
+─────────────────────────────────────────────────────
+Chain A                                Chain B
+┌──────────────┐                      ┌──────────────┐
+│ WarpSender   │──────────────────────>│ WarpReceiver │
+│              │  setRemoteReceiver    │              │
+│ Knows where  │                       │ Trusts       │
+│ to send  ────┼───────────────────────┤ sender       │
+│              │<──────────────────────│              │
+│              │  setApprovedSender    │              │
+└──────────────┘                      └──────────────┘
+      ↑                                      ↑
+Config cost: ~$0.20                   Config cost: ~$0.20
+
+Total deployment cost: ~$6.18 (one-time)
+```
+
+### Why All 3 Steps Are Required
+
+1. **Step 1-2 (Deploy):** Creates the smart contracts on each chain
+   - Without this: No contracts exist
+   - Cost: ~$5.78 total
+
+2. **Step 3 (Configure):** Establishes trust between chains
+   - Without this: Contracts can't communicate
+   - Cost: ~$0.40 total
+
+**Important:** The SDK **automates all 3 steps** with CLI or code methods!
+
+---
+
+## 🔄 Deployment Workflow & Best Practices
+
+### Understanding: Deploy Once, Use Forever
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                     Deployment Lifecycle                       │
+└────────────────────────────────────────────────────────────────┘
+
+Phase 1: DEPLOY (One-Time Only)          Phase 2: USE (Forever)
+─────────────────────────────────        ───────────────────────
+Time: ~30 seconds                         Time: Milliseconds per call
+Cost: ~$6 total                           Cost: ~$0.10 per transaction
+
+┌──────────────┐                         ┌──────────────┐
+│ Run CLI or   │                         │ Your App     │
+│ Deployment   │                         │              │
+│ Script       │                         │ new Warp402()│
+└──────┬───────┘                         └──────┬───────┘
+       │                                        │
+       │ Deploy contracts                       │ Use contracts
+       ↓                                        ↓
+┌──────────────┐                         ┌──────────────┐
+│ Get Addresses│──────────────────────→  │ Load from    │
+│ Save to .env │  Copy addresses         │ .env file    │
+└──────────────┘                         └──────────────┘
+
+❌ DELETE deployment script              ✅ KEEP using contracts
+   (don't need it anymore)                  (forever)
+```
+
+### ✅ Recommended Workflow
+
+#### Option A: Using CLI (Easiest)
+
+```bash
+# 1. Deploy once (keeps deployment code separate)
+npx avax-warp-pay deploy \
+  --sender-rpc $SENDER_RPC \
+  --receiver-rpc $RECEIVER_RPC \
+  --private-key $PRIVATE_KEY
+
+# 2. Copy output to .env file
+# SENDER_ADDRESS=0x5aa01B...
+# RECEIVER_ADDRESS=0x52C84...
+
+# 3. Use in your app forever (no deployment code!)
+```
+
+Your app (`index.ts`):
+```typescript
+import { Warp402 } from 'avax-warp-pay';
+
+// Just load addresses and use
+const warp = new Warp402({
+  privateKey: process.env.PRIVATE_KEY!,
+  senderChain: {
+    rpc: "...",
+    chainId: 43112,
+    blockchainId: "0x7fc93d85...",
+    messenger: "0x253b2784...",
+    sender: process.env.SENDER_ADDRESS! // From .env
+  },
+  receiverChain: {
+    rpc: "...",
+    chainId: 99999,
+    blockchainId: "0xc063de20...",
+    messenger: "0x253b2784...",
+    receiver: process.env.RECEIVER_ADDRESS! // From .env
+  }
+});
+
+// Your business logic runs forever
+app.post('/pay', async () => {
+  await warp.pay(ethers.parseEther("0.1"));
+});
+```
+
+#### Option B: Using SDK Code
+
+```bash
+# 1. Create temporary deployment script
+cat > deploy-once.ts << 'EOF'
+import { Warp402Factory } from 'avax-warp-pay';
+
+async function deploy() {
+  const warp = await Warp402Factory.quickSetup({
+    privateKey: process.env.PRIVATE_KEY!,
+    senderChain: { rpc, chainId, blockchainId },
+    receiverChain: { rpc, chainId, blockchainId }
+  });
+  
+  console.log('SENDER_ADDRESS=' + (warp as any).config.senderChain.sender);
+  console.log('RECEIVER_ADDRESS=' + (warp as any).config.receiverChain.receiver);
+}
+
+deploy();
+EOF
+
+# 2. Run once
+npx ts-node deploy-once.ts
+
+# 3. Save addresses to .env
+# SENDER_ADDRESS=0x5aa01B...
+# RECEIVER_ADDRESS=0x52C84...
+
+# 4. Delete deployment script (don't need it)
+rm deploy-once.ts
+
+# 5. Use addresses in your app (same as Option A)
+```
+
+### ❌ Common Mistakes
+
+#### Mistake 1: Keeping Deployment Code in Production
+
+**DON'T:**
+```typescript
+// app.ts - WRONG! ❌
+import { Warp402Factory } from 'avax-warp-pay';
+
+app.listen(3000, async () => {
+  // DON'T deploy every time app starts!
+  const warp = await Warp402Factory.quickSetup({...}); // ❌ BAD
+});
+```
+
+**Why it's wrong:**
+- Deploys NEW contracts every restart ($6 each time!)
+- Loses previous contract state
+- Takes 30 seconds on every startup
+- Users lose their payment history
+
+**DO:**
+```typescript
+// app.ts - CORRECT! ✅
+import { Warp402 } from 'avax-warp-pay';
+
+// Load existing deployed addresses
+const warp = new Warp402({
+  privateKey: process.env.PRIVATE_KEY!,
+  senderChain: {
+    rpc: "...",
+    sender: process.env.SENDER_ADDRESS! // ✅ GOOD - from .env
+    // ...
+  },
+  receiverChain: {
+    rpc: "...",
+    receiver: process.env.RECEIVER_ADDRESS! // ✅ GOOD - from .env
+    // ...
+  }
+});
+
+app.listen(3000, () => {
+  console.log('Server ready!'); // Instant startup ⚡
+});
+```
+
+#### Mistake 2: Not Saving Addresses
+
+**DON'T:**
+```bash
+# Deploy and forget
+npx avax-warp-pay deploy
+# ... 30 seconds later ...
+# "What were those addresses again?" 😱
+```
+
+**DO:**
+```bash
+# Deploy and immediately save
+npx avax-warp-pay deploy > deployment-output.txt
+cat deployment-output.txt  # Copy addresses to .env
+
+# Or pipe directly
+npx avax-warp-pay deploy | grep "ADDRESS=" >> .env
+```
+
+#### Mistake 3: Deploying on Wrong Networks
+
+**DON'T:**
+```bash
+# Testnet deployment
+npx avax-warp-pay deploy --sender-rpc https://api.avax-test.network/...
+
+# Later in production... ❌
+SENDER_ADDRESS=0x... # Still using testnet address!
+```
+
+**DO:**
+```bash
+# Testnet deployment
+npx avax-warp-pay deploy --sender-rpc https://api.avax-test.network/...
+# Save as: .env.testnet
+
+# Production deployment (SEPARATE!)
+npx avax-warp-pay deploy --sender-rpc https://api.avax.network/...
+# Save as: .env.production
+
+# Use correct file per environment
+cp .env.production .env  # For production
+cp .env.testnet .env     # For testing
+```
+
+### 📋 Deployment Checklist
+
+Before deploying to production:
+
+- [ ] ✅ Have AVAX on both chains (~0.1 AVAX minimum)
+- [ ] ✅ Tested on testnet/local network first
+- [ ] ✅ Have RPC URLs for both chains
+- [ ] ✅ Have blockchain IDs (hex format with 0x prefix)
+- [ ] ✅ Know ICM Messenger address for your network
+- [ ] ✅ Private key is secure (use .env file, not hardcoded)
+- [ ] ✅ Ready to save contract addresses immediately
+- [ ] ✅ Understand this is ONE-TIME deployment
+
+After deploying:
+
+- [ ] ✅ Saved contract addresses to .env file
+- [ ] ✅ Backed up .env file (secure location!)
+- [ ] ✅ Tested payment flow end-to-end
+- [ ] ✅ Verified payment receipt on receiver chain
+- [ ] ✅ Deleted/archived deployment script (optional)
+- [ ] ✅ Updated your app to use saved addresses
+- [ ] ✅ Documented addresses in your internal docs
+
+### 🔐 Security Best Practices
+
+```bash
+# 1. Use environment variables
+# .env file (NEVER commit to git!)
+PRIVATE_KEY=0x...
+SENDER_ADDRESS=0x...
+RECEIVER_ADDRESS=0x...
+
+# 2. Add to .gitignore
+echo ".env" >> .gitignore
+echo ".env.*" >> .gitignore
+echo "deployment-addresses.json" >> .gitignore
+
+# 3. Use separate keys for deployment vs runtime
+# Deployment key: Has funds for deployment (~0.1 AVAX)
+# Runtime key: Only needs funds for transactions (~0.01 AVAX)
+
+# 4. Back up addresses securely
+# Save to password manager or secure vault
+# Format: network_name_sender=0x... network_name_receiver=0x...
+```
+
+### 🌐 Multi-Environment Setup
+
+For teams deploying across environments:
+
+```bash
+# Directory structure
+your-project/
+├── .env.local          # Local development addresses
+├── .env.testnet        # Testnet addresses
+├── .env.production     # Production addresses (SECURE!)
+├── deploy-addresses.json  # All deployment records
+└── src/
+    └── index.ts        # Your app (uses .env)
+
+# Deployment workflow
+# 1. Deploy to local
+npx avax-warp-pay deploy --sender-rpc http://localhost:9650/... > .env.local
+
+# 2. Deploy to testnet
+npx avax-warp-pay deploy --sender-rpc https://api.avax-test.network/... > .env.testnet
+
+# 3. Deploy to production (CAREFUL!)
+npx avax-warp-pay deploy --sender-rpc https://api.avax.network/... > .env.production
+
+# 4. Switch environments
+cp .env.local .env      # For local dev
+cp .env.testnet .env    # For testing
+cp .env.production .env # For production
+
+# 5. Or use dotenv-cli
+npm install -g dotenv-cli
+dotenv -e .env.production -- npm start
+```
+
+---
 
 ### Troubleshooting Deployment Errors
 
@@ -1117,18 +1968,134 @@ If not documented, ask in their Discord/support.
 - Teleporter relayer speed
 - Number of validator signatures required
 
-### Q: What is the "handshake" and why is it critical?
+### Q: Which deployment method should I use?
 
-**A: The handshake is the configuration that connects contracts on different chains:**
+**A: Choose based on your needs:**
 
-```solidity
-// Step 3: Configure WarpSender to know where to send
-await senderContract.setRemoteReceiver(
-  chainB_blockchainId,  // Destination chain
-  receiverAddress       // Receiver contract address
-);
+| Your Situation | Best Method | Why |
+|----------------|-------------|-----|
+| **First time user** | CLI Tool | Easiest, no code needed |
+| **Quick testing/demo** | CLI Tool | Fastest setup |
+| **TypeScript project** | SDK Code | Integrates with your build |
+| **CI/CD pipeline** | SDK Code | Programmatic control |
+| **Custom gas limits** | Manual Foundry | Full customization |
+| **Learning/exploring** | Manual Foundry | See each step |
 
-// Step 4: Configure WarpReceiver to trust sender
+**Quick recommendation:** Start with CLI, move to SDK code if you need automation.
+
+### Q: Do I need deployment code in my production app?
+
+**A: NO! Deployment is ONE-TIME only.**
+
+```typescript
+// ❌ WRONG - Don't keep deployment code in your app
+app.listen(3000, async () => {
+  const warp = await Warp402Factory.quickSetup({...}); // BAD!
+});
+
+// ✅ CORRECT - Just use deployed addresses
+const warp = new Warp402({
+  senderChain: { sender: process.env.SENDER_ADDRESS },
+  receiverChain: { receiver: process.env.RECEIVER_ADDRESS }
+  // ... other config
+});
+
+app.listen(3000, () => {
+  console.log('Ready!'); // Instant startup ⚡
+});
+```
+
+**Workflow:**
+1. Deploy ONCE using CLI or deployment script
+2. Save contract addresses to `.env` file
+3. Delete deployment script (optional)
+4. Use saved addresses in your app FOREVER
+
+### Q: What happens if I deploy multiple times?
+
+**A: You get NEW contracts each time (costs money!):**
+
+```bash
+# First deployment
+npx avax-warp-pay deploy  # Cost: $6
+# SENDER_ADDRESS=0x1111...
+
+# Second deployment (by accident)
+npx avax-warp-pay deploy  # Cost: $6 AGAIN
+# SENDER_ADDRESS=0x2222...  # ← Different address!
+
+# Now you have 2 separate contract systems
+# Old payments won't work with new contracts
+```
+
+**Important:**
+- Each deployment creates completely new contracts
+- Old contracts still exist (can't be deleted)
+- Old contract state is lost (payment history)
+- Users lose access to old payment receipts
+
+**Best practice:** Deploy once, reuse forever.
+
+### Q: Can I update deployed contracts?
+
+**A: NO - contracts are immutable once deployed.**
+
+If you need changes:
+1. Deploy NEW contracts with updated code
+2. Update your app to use new addresses
+3. Migrate data/state manually if needed
+4. Old contracts remain on-chain (can't remove)
+
+**This is why testing is critical before production deployment!**
+
+### Q: How do I test deployment before production?
+
+**A: Use this progression:**
+
+```bash
+# 1. Local network (free, instant)
+npx avax-warp-pay deploy \
+  --sender-rpc http://localhost:9650/... \
+  --receiver-rpc http://localhost:9650/...
+# Test your full flow here
+
+# 2. Fuji testnet (free AVAX, slow)
+npx avax-warp-pay deploy \
+  --sender-rpc https://api.avax-test.network/... \
+  --receiver-rpc https://api.avax-test.network/...
+# Test with real network conditions
+
+# 3. Production mainnet (real AVAX, CAREFUL!)
+npx avax-warp-pay deploy \
+  --sender-rpc https://api.avax.network/... \
+  --receiver-rpc https://api.avax.network/...
+# Only after successful testnet testing
+```
+
+### Q: What if I lose my deployed contract addresses?
+
+**A: You can recover them from blockchain explorers:**
+
+```bash
+# 1. Check deployment transaction in wallet history
+# Look for contract creation transactions
+
+# 2. Search on blockchain explorer
+# Snowtrace (Fuji): https://testnet.snowtrace.io/
+# Snowtrace (Mainnet): https://snowtrace.io/
+
+# 3. Search by deployer address (your wallet)
+# Filter: "Contract Creation" transactions
+
+# 4. Or check deployment script output logs
+# If you saved terminal output
+cat deployment-output.txt
+```
+
+**Prevention:** Always save addresses immediately:
+```bash
+npx avax-warp-pay deploy | tee deployment-$(date +%Y%m%d).txt
+cat deployment-*.txt >> .env
 await receiverContract.setApprovedSender(
   chainA_blockchainId,  // Source chain
   senderAddress         // Sender contract address

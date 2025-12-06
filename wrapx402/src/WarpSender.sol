@@ -2,20 +2,19 @@
 pragma solidity ^0.8.18;
 
 import {ITeleporterMessenger} from "./TeleporterInterfaces.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import {Owned} from "./Owned.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract WarpSender is Ownable, Pausable, ReentrancyGuard {
+contract WarpSender is Owned, ReentrancyGuard {
     ITeleporterMessenger public immutable MESSENGER;
     
     // Configured remote destination
     bytes32 public remoteBlockchainId;
     address public remoteReceiver;
     
-    // Configurable gas limit for cross-chain messages
-    uint256 public defaultGasLimit = 200000;
-    uint256 public messageGasLimit = 100000;
+    // Immutable gas limits for cross-chain messages
+    uint256 public immutable defaultGasLimit = 200000;
+    uint256 public immutable messageGasLimit = 100000;
 
     // Payment receipt structure
     struct PaymentReceipt {
@@ -36,10 +35,9 @@ contract WarpSender is Ownable, Pausable, ReentrancyGuard {
     );
     
     event FundsWithdrawn(address indexed owner, uint256 amount);
-    event GasLimitUpdated(uint256 messageGasLimit, uint256 paymentGasLimit);
     event RemoteReceiverUpdated(bytes32 blockchainId, address receiver);
 
-    constructor(address _messenger) Ownable(msg.sender) {
+    constructor(address _messenger) {
         MESSENGER = ITeleporterMessenger(_messenger);
     }
 
@@ -52,24 +50,15 @@ contract WarpSender is Ownable, Pausable, ReentrancyGuard {
         emit RemoteReceiverUpdated(_remoteBlockchainId, _remoteReceiver);
     }
     
-    // Configure gas limits (owner only)
-    function setGasLimits(uint256 _messageGasLimit, uint256 _paymentGasLimit) external onlyOwner {
-        require(_messageGasLimit > 0 && _messageGasLimit <= 1000000, "Invalid message gas limit");
-        require(_paymentGasLimit > 0 && _paymentGasLimit <= 1000000, "Invalid payment gas limit");
-        messageGasLimit = _messageGasLimit;
-        defaultGasLimit = _paymentGasLimit;
-        emit GasLimitUpdated(_messageGasLimit, _paymentGasLimit);
-    }
-    
     // Withdraw collected payments (owner only)
     function withdraw() external onlyOwner nonReentrant {
         uint256 balance = address(this).balance;
         require(balance > 0, "No funds to withdraw");
         
-        (bool success, ) = payable(owner()).call{value: balance}("");
+        (bool success, ) = payable(owner).call{value: balance}("");
         require(success, "Withdrawal failed");
         
-        emit FundsWithdrawn(owner(), balance);
+        emit FundsWithdrawn(owner, balance);
     }
     
     // Withdraw specific amount (owner only)
@@ -77,20 +66,10 @@ contract WarpSender is Ownable, Pausable, ReentrancyGuard {
         require(amount > 0, "Amount must be greater than 0");
         require(address(this).balance >= amount, "Insufficient balance");
         
-        (bool success, ) = payable(owner()).call{value: amount}("");
+        (bool success, ) = payable(owner).call{value: amount}("");
         require(success, "Withdrawal failed");
         
-        emit FundsWithdrawn(owner(), amount);
-    }
-    
-    // Emergency pause (owner only)
-    function pause() external onlyOwner {
-        _pause();
-    }
-    
-    // Unpause (owner only)
-    function unpause() external onlyOwner {
-        _unpause();
+        emit FundsWithdrawn(owner, amount);
     }
     
     // Get contract balance
@@ -99,7 +78,7 @@ contract WarpSender is Ownable, Pausable, ReentrancyGuard {
     }
 
     // Sends message to remote subnet
-    function sendMessage(string calldata message) external payable whenNotPaused {
+    function sendMessage(string calldata message) external payable {
         require(remoteReceiver != address(0), "Receiver not set");
         require(remoteBlockchainId != bytes32(0), "Remote Chain ID not set");
 
@@ -119,7 +98,7 @@ contract WarpSender is Ownable, Pausable, ReentrancyGuard {
     }
 
     // Sends payment receipt to remote subnet
-    function sendPayment(bytes32 paymentId) external payable whenNotPaused nonReentrant {
+    function sendPayment(bytes32 paymentId) external payable nonReentrant {
         require(remoteReceiver != address(0), "Receiver not set");
         require(remoteBlockchainId != bytes32(0), "Remote Chain ID not set");
         require(msg.value > 0, "Payment amount must be greater than 0");

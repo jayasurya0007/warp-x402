@@ -19,7 +19,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VERSION = exports.withPrivateKey = exports.DEPLOYED_CONTRACTS = exports.PRESETS = exports.Config = exports.ReceiverClient = exports.SenderClient = exports.Warp402 = void 0;
+exports.VERSION = exports.withPrivateKey = exports.DEPLOYED_CONTRACTS = exports.PRESETS = exports.ContractDeployer = exports.Warp402Factory = exports.Config = exports.ReceiverClient = exports.SenderClient = exports.Warp402 = void 0;
 // Main SDK class
 var Warp402_1 = require("./core/Warp402");
 Object.defineProperty(exports, "Warp402", { enumerable: true, get: function () { return Warp402_1.Warp402; } });
@@ -30,6 +30,11 @@ var ReceiverClient_1 = require("./core/ReceiverClient");
 Object.defineProperty(exports, "ReceiverClient", { enumerable: true, get: function () { return ReceiverClient_1.ReceiverClient; } });
 var Config_1 = require("./core/Config");
 Object.defineProperty(exports, "Config", { enumerable: true, get: function () { return Config_1.Config; } });
+// Deployment automation
+var Warp402Factory_1 = require("./deploy/Warp402Factory");
+Object.defineProperty(exports, "Warp402Factory", { enumerable: true, get: function () { return Warp402Factory_1.Warp402Factory; } });
+var ContractDeployer_1 = require("./deploy/ContractDeployer");
+Object.defineProperty(exports, "ContractDeployer", { enumerable: true, get: function () { return ContractDeployer_1.ContractDeployer; } });
 // Types
 __exportStar(require("./types"), exports);
 // Utilities
@@ -40,5 +45,5 @@ Object.defineProperty(exports, "PRESETS", { enumerable: true, get: function () {
 Object.defineProperty(exports, "DEPLOYED_CONTRACTS", { enumerable: true, get: function () { return presets_1.DEPLOYED_CONTRACTS; } });
 Object.defineProperty(exports, "withPrivateKey", { enumerable: true, get: function () { return presets_1.withPrivateKey; } });
 // Version
-exports.VERSION = '1.0.3';
+exports.VERSION = '1.0.4';
 //# sourceMappingURL=index.js.map
