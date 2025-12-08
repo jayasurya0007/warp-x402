@@ -10,9 +10,9 @@ const AgentOS = () => {
          transition={{ duration: 0.8 }}
          viewport={{ once: true }}
       >
-        <h2 className="text-5xl md:text-8xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600">
-          Teleport assets <br />
-          <span className="text-brand-orange">across subnets</span>
+        <h2 className="text-5xl md:text-8xl font-bold font-manrope mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600">
+          Pay Anywhere <br />
+          <span className="text-brand-orange">without Barriers</span>
         </h2>
         <p className="text-gray-400 text-xl font-mono mt-4">Zero friction. Infinite scalability. True Interoperability.</p>
       </motion.div>

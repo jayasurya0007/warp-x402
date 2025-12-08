@@ -5,7 +5,7 @@ import { Terminal, Check, Globe, Send, Server, CreditCard, Lock } from 'lucide-r
 const ProcessSteps = () => {
   return (
     <section className="py-24 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col gap-32">
+      <div className="w-full px-6 md:px-12 lg:px-24 flex flex-col gap-32">
         
         {/* Step 1 */}
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -16,7 +16,7 @@ const ProcessSteps = () => {
             transition={{ duration: 0.6 }}
           >
             <span className="text-brand-orange font-mono text-lg font-bold mb-4 block">01.</span>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            <h2 className="text-4xl md:text-6xl font-bold font-manrope mb-6">
               Client requests <br/> resource
             </h2>
             <p className="text-gray-400 text-lg">
@@ -109,7 +109,7 @@ const ProcessSteps = () => {
             className="order-1 md:order-2"
           >
             <span className="text-brand-orange font-mono text-lg font-bold mb-4 block">02.</span>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            <h2 className="text-4xl md:text-6xl font-bold font-manrope mb-6">
               Pay on <br/> Source Chain
             </h2>
             <p className="text-gray-400 text-lg">
@@ -127,7 +127,7 @@ const ProcessSteps = () => {
             transition={{ duration: 0.6 }}
           >
             <span className="text-brand-orange font-mono text-lg font-bold mb-4 block">03.</span>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            <h2 className="text-4xl md:text-6xl font-bold font-manrope mb-6">
               Verify on <br/> Destination
             </h2>
             <p className="text-gray-400 text-lg">

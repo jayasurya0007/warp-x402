@@ -2,8 +2,9 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="bg-brand-orange text-white py-20">
-      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-20">
+    <footer className="relative bg-brand-orange text-white py-20 overflow-hidden">
+      {/* Footer Content */}
+      <div className="relative z-10 w-full px-6 md:px-12 lg:px-24 grid md:grid-cols-2 gap-20">
         <div>
            <h3 className="font-mono uppercase text-sm font-bold tracking-widest mb-6 border-b border-white/20 pb-2">
            <div className="flex items-center mb-4">
@@ -22,7 +23,7 @@ const Footer = () => {
 
         <div className="grid grid-cols-2 gap-12 font-mono text-sm">
            <div>
-              <h4 className="font-bold mb-4 text-black/60">PROJECT</h4>
+              <h4 className="font-bold font-manrope mb-4 text-black/60">PROJECT</h4>
               <ul className="space-y-2">
                  <li><a href="#" className="hover:underline">HOME</a></li>
                  <li><a href="#" className="hover:underline">ARCHITECTURE</a></li>
@@ -31,7 +32,7 @@ const Footer = () => {
               </ul>
            </div>
            <div>
-              <h4 className="font-bold mb-4 text-black/60">RESOURCES</h4>
+              <h4 className="font-bold font-manrope mb-4 text-black/60">RESOURCES</h4>
               <li><a href="https://github.com/jayasurya0007/wrap-x402" className="hover:underline">GITHUB REPO</a></li>
               <li><a href="#" className="hover:underline">DOCS</a></li>
               <li><a href="#" className="hover:underline">AVALANCHE</a></li>
@@ -39,7 +40,7 @@ const Footer = () => {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto px-6 mt-20 flex flex-col md:flex-row justify-between items-end border-t border-white/20 pt-8 font-mono text-xs">
+      <div className="relative z-10 w-full px-6 md:px-12 lg:px-24 mt-20 flex flex-col md:flex-row justify-between items-end border-t border-white/20 pt-8 font-mono text-xs">
          <div className="flex gap-8 mb-4 md:mb-0">
             <span className="opacity-80">MIT LICENSE</span>
          </div>

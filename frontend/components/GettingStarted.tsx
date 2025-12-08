@@ -5,11 +5,11 @@ import { Terminal, Download, ArrowRight, Code } from 'lucide-react';
 const GettingStarted = () => {
   return (
     <section className="py-20 bg-[#0A0A0A]">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="w-full px-6 md:px-12 lg:px-24">
         
         {/* Header */}
         <div className="mb-20">
-          <h2 className="text-5xl md:text-7xl font-bold mb-8">
+          <h2 className="text-5xl md:text-7xl font-bold font-manrope mb-8">
             Integrate in <br/> minutes
           </h2>
           <div className="flex gap-12 text-sm font-mono text-gray-500 border-b border-white/10 pb-4">
@@ -78,12 +78,12 @@ const GettingStarted = () => {
             transition={{ delay: 0.2 }}
           >
              <div>
-                <h3 className="text-lg font-bold mb-4">Installation</h3>
+                <h3 className="text-lg font-bold font-manrope mb-4">Installation</h3>
                 <div className="bg-black/50 p-4 rounded-lg font-mono text-sm border border-white/5 mb-6">
                    <div className="text-gray-500 select-none">$</div> npm install avax-warp-pay
                 </div>
                 
-                <h3 className="text-lg font-bold mb-4">Supported Networks</h3>
+                <h3 className="text-lg font-bold font-manrope mb-4">Supported Networks</h3>
                 <div className="space-y-3">
                    <div className="bg-white/5 p-3 rounded text-sm flex justify-between items-center">
                       <span>Fuji C-Chain</span>
@@ -109,7 +109,7 @@ const GettingStarted = () => {
         {/* Feature Grid Below */}
         <div className="grid md:grid-cols-2 gap-6 mt-6">
            <div className="glass-card p-8 rounded-xl border border-white/10">
-              <h3 className="text-2xl font-bold mb-2">SDK-Powered Server</h3>
+              <h3 className="text-2xl font-bold font-manrope mb-2">SDK-Powered Server</h3>
               <p className="text-gray-400 text-sm mb-6">Production HTTP 402 server powered by the SDK. Includes health monitoring and automatic CORS support.</p>
               <div className="flex gap-2">
                  <span className="text-xs bg-brand-orange/20 text-brand-orange px-2 py-1 rounded">Node.js</span>
@@ -118,7 +118,7 @@ const GettingStarted = () => {
            </div>
 
            <div className="glass-card p-8 rounded-xl border border-white/10">
-              <h3 className="text-2xl font-bold mb-2">Battle-Tested Contracts</h3>
+              <h3 className="text-2xl font-bold font-manrope mb-2">Battle-Tested Contracts</h3>
               <p className="text-gray-400 text-sm mb-6">Includes ReentrancyGuard, Ownable, and Pausable protections. 60+ comprehensive Foundry tests.</p>
               <div className="font-mono text-xs bg-black/50 p-4 rounded border-l-2 border-green-500">
                  <div className="text-green-500 mb-1">✓ Access Control Verified</div>

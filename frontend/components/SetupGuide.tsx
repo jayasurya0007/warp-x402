@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Terminal, ChevronRight, AlertCircle, Package, Settings, Zap } from 'lucide-react';
+import { Terminal, ChevronRight, AlertCircle, Package, Settings, Zap, Copy, Check } from 'lucide-react';
 
 const STEPS = [
   {
@@ -81,15 +81,15 @@ const STEPS = [
 ];
 
 const TerminalWindow = ({ title, children, className = "" }) => (
-  <div className={`bg-[#0F0F0F] rounded-lg overflow-hidden border border-white/10 font-mono text-sm shadow-2xl ${className}`}>
+  <div className={`bg-[#0A0A0A] rounded-xl overflow-hidden border border-white/10 font-mono text-sm shadow-2xl ${className}`}>
     {/* Title Bar */}
-    <div className="bg-[#1A1A1A] px-4 py-2 flex items-center justify-between border-b border-white/5">
-      <div className="flex gap-2">
-        <div className="w-3 h-3 rounded-full bg-red-500/80" />
-        <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-        <div className="w-3 h-3 rounded-full bg-green-500/80" />
+    <div className="bg-[#111] px-4 py-2 flex items-center justify-between border-b border-white/5">
+      <div className="flex gap-1.5">
+        <div className="w-3 h-3 rounded-full bg-red-500/50" />
+        <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+        <div className="w-3 h-3 rounded-full bg-green-500/50" />
       </div>
-      <div className="text-gray-500 text-xs flex items-center gap-2">
+      <div className="text-gray-500 text-xs font-mono uppercase tracking-wider flex items-center gap-2">
         <Terminal size={12} />
         {title}
       </div>
@@ -98,8 +98,6 @@ const TerminalWindow = ({ title, children, className = "" }) => (
     
     {/* Content */}
     <div className="p-6 h-full overflow-y-auto custom-scrollbar relative">
-      {/* Scanline Effect */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20" />
       {children}
     </div>
   </div>
@@ -109,6 +107,7 @@ const SetupGuide = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [displayedLines, setDisplayedLines] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setDisplayedLines([]);
@@ -136,68 +135,114 @@ const SetupGuide = () => {
     return () => clearInterval(interval);
   }, [activeStep]);
 
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <section className="py-32 bg-brand-dark relative">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16">
-          <div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Setting Up the SDK</h2>
-            <p className="text-gray-400 max-w-xl">
-              Follow these simple steps to integrate cross-chain payments into your dApp.
-            </p>
-          </div>
+    <section className="relative min-h-screen bg-[#080808] py-24 overflow-hidden font-sans">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+
+      <div className="w-full px-6 md:px-12 lg:px-24 relative z-10">
+        {/* Header */}
+        <div className="mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-center gap-2 mb-6"
+          >
+            <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
+            <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">SETUP GUIDE</span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-6xl font-bold font-manrope leading-tight mb-6 text-white"
+          >
+            Setting Up the <span className="text-brand-orange">SDK</span>
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-gray-400 text-lg leading-relaxed max-w-2xl"
+          >
+            Follow these simple steps to integrate cross-chain payments into your dApp.
+          </motion.p>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-8 h-[600px] lg:h-[500px]">
+        <div className="grid lg:grid-cols-12 gap-8">
           {/* Left: Navigation */}
-          <div className="lg:col-span-4 flex flex-col gap-2">
+          <div className="lg:col-span-4 flex flex-col gap-3">
             {STEPS.map((step, idx) => (
-              <button
+              <motion.button
                 key={step.id}
                 onClick={() => setActiveStep(idx)}
-                className={`text-left p-4 rounded-lg border transition-all duration-300 group relative overflow-hidden ${
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className={`text-left p-5 rounded-xl border transition-all duration-300 group relative overflow-hidden ${
                   activeStep === idx 
-                    ? 'bg-white/5 border-brand-orange/50 translate-x-2' 
-                    : 'bg-transparent border-transparent hover:bg-white/5 hover:border-white/10'
+                    ? 'bg-white/5 border-brand-orange/50' 
+                    : 'bg-transparent border-white/10 hover:bg-white/5 hover:border-white/20'
                 }`}
               >
                 {activeStep === idx && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-orange" />
+                  <motion.div 
+                    layoutId="activeStep"
+                    className="absolute left-0 top-0 bottom-0 w-1 bg-brand-orange" 
+                  />
                 )}
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-mono px-2 py-0.5 rounded ${
-                      activeStep === idx ? 'bg-brand-orange/20 text-brand-orange' : 'bg-white/10 text-gray-500'
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-mono px-2.5 py-1 rounded ${
+                      activeStep === idx ? 'bg-brand-orange/20 text-brand-orange border border-brand-orange/30' : 'bg-white/10 text-gray-500 border border-white/10'
                     }`}>
                       0{idx + 1}
                     </span>
-                    <h3 className={`font-bold transition-colors ${activeStep === idx ? 'text-white' : 'text-gray-400'}`}>
+                    <h3 className={`font-bold font-manrope transition-colors text-base ${activeStep === idx ? 'text-white' : 'text-gray-400'}`}>
                       {step.label}
                     </h3>
                   </div>
-                  {activeStep === idx && <ChevronRight size={16} className="text-brand-orange animate-pulse" />}
+                  {activeStep === idx && (
+                    <ChevronRight size={18} className="text-brand-orange" />
+                  )}
                 </div>
-                <p className="text-xs text-gray-500 pl-9 line-clamp-1 group-hover:text-gray-400 transition-colors">
+                <p className="text-sm text-gray-500 pl-11 line-clamp-1 group-hover:text-gray-400 transition-colors">
                   {step.title}
                 </p>
-              </button>
+                <p className="text-xs text-gray-600 pl-11 mt-1 line-clamp-2">
+                  {step.description}
+                </p>
+              </motion.button>
             ))}
           </div>
 
           {/* Right: Terminal */}
-          <div className="lg:col-span-8 h-full">
-            <div className="relative h-full">
-              {/* Decorative elements */}
-              <div className="absolute -top-10 right-10 w-24 h-24 bg-brand-orange/20 rounded-full blur-3xl" />
-              <div className="absolute -bottom-10 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl" />
-
+          <div className="lg:col-span-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="relative h-[700px]"
+            >
               <TerminalWindow 
                 title={`bash — ${STEPS[activeStep]?.id || 'terminal'}`} 
-                className="h-full relative z-10"
+                className="h-full"
               >
                 <div className="space-y-2">
                   {displayedLines.map((line, i) => (
-                    // Safety Check: Only render if line exists
                     line ? (
                       <motion.div 
                         key={i}
@@ -209,19 +254,25 @@ const SetupGuide = () => {
                           <span className="text-gray-500 italic">{line.text}</span>
                         )}
                         {line.type === 'cmd' && (
-                          <div className="flex gap-2 text-white group">
+                          <div className="flex gap-2 text-white group items-center">
                             <span className="text-brand-orange select-none">$</span>
-                            <span>{line.text}</span>
+                            <span className="flex-1">{line.text}</span>
+                            <button
+                              onClick={() => handleCopy(line.text)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded ml-2"
+                            >
+                              {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} className="text-gray-400" />}
+                            </button>
                           </div>
                         )}
                         {line.type === 'output' && (
                           <span className="text-gray-400 block pl-4 border-l-2 border-white/10 ml-1">{line.text}</span>
                         )}
                         {line.type === 'success' && (
-                          <span className="text-green-400 block">{line.text}</span>
+                          <span className="text-green-400 block font-semibold">{line.text}</span>
                         )}
                         {line.type === 'code' && (
-                          <span className="text-blue-300 font-normal">{line.text}</span>
+                          <span className="text-blue-300 font-normal block pl-2">{line.text}</span>
                         )}
                         {line.type === 'break' && <br />}
                       </motion.div>
@@ -231,15 +282,15 @@ const SetupGuide = () => {
                   {isTyping && (
                     <div className="inline-block w-2 h-4 bg-brand-orange animate-pulse align-middle ml-1" />
                   )}
-                  {!isTyping && (
-                    <div className="flex gap-2 mt-2">
+                  {!isTyping && displayedLines.length > 0 && (
+                    <div className="flex gap-2 mt-4 items-center">
                       <span className="text-brand-orange">$</span>
                       <span className="w-2 h-4 bg-gray-500 animate-pulse" />
                     </div>
                   )}
                 </div>
               </TerminalWindow>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

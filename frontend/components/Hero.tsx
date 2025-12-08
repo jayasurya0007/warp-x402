@@ -117,7 +117,7 @@ const Hero = () => {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center c">
+      <div className="relative z-10 w-full px-6 md:px-12 lg:px-24 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -127,10 +127,10 @@ const Hero = () => {
            <span className="text-brand-orange font-mono text-sm tracking-[0.2em] mb-6 inline-block uppercase font-bold px-3 py-1 rounded border border-brand-orange/20 bg-brand-orange/10">
             HTTP 402 ON AVALANCHE
           </span>
-          <h1 className="text-5xl md:text-8xl font-bold leading-[1.1] mb-8 tracking-tight">
+          <h1 className="text-5xl md:text-8xl font-bold font-manrope leading-[1.1] mb-8 tracking-tight">
             Warp-402 <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-gray-500">
-              verified instantly.
+              Verified Instantly
             </span>
           </h1>
           <p className="text-gray-400 text-lg md:text-xl mb-12 leading-relaxed max-w-2xl">

@@ -1,34 +1,80 @@
 import React from 'react';
-
-const logos = [
-  { name: 'Avalanche', src: 'https://upload.wikimedia.org/wikipedia/en/2/23/Avalanche_Blockchain_Logo.png' },
-  { name: 'Solidity', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/solidity/solidity-original.svg' },
-  { name: 'TypeScript', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
-  { name: 'Foundry', src: 'https://avatars.githubusercontent.com/u/96381504?s=200&v=4' }, // Foundry Logo placeholder
-  { name: 'OpenZeppelin', src: 'https://seeklogo.com/images/O/openzeppelin-logo-9556A69F06-seeklogo.com.png' },
-  { name: 'Node.js', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
-];
+import { motion } from 'framer-motion';
 
 const TrustedBy = () => {
   return (
     <section className="py-20 border-b border-white/5 bg-brand-dark relative z-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <h3 className="text-brand-orange font-mono text-sm tracking-widest mb-8 uppercase font-bold">
-          Built with Modern Web3 Stack
-        </h3>
-        <div className="flex flex-wrap items-center gap-12 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-          {logos.map((logo, idx) => (
-            <img 
-              key={idx} 
-              src={logo.src} 
-              alt={logo.name} 
-              className="h-8 md:h-12 w-auto object-contain brightness-200 contrast-0 hover:contrast-100 hover:brightness-100 transition-all" 
-            />
-          ))}
-        </div>
-        <p className="mt-8 text-gray-400 max-w-2xl">
-          Warp-402 leverages the power of Avalanche Teleporter for instant cross-subnet messaging, secured by OpenZeppelin standards and tested with Foundry.
-        </p>
+      <div className="w-full px-6 md:px-12 lg:px-24 relative z-10">
+          {/* Badge */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-center gap-2 mb-6"
+          >
+            <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
+            <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">ABOUT</span>
+          </motion.div>
+
+          {/* Heading */}
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-6xl font-bold font-manrope leading-tight mb-8 text-white"
+          >
+            Cross-Chain Payments <span className="text-brand-orange">Made Simple</span>
+          </motion.h2>
+
+          {/* Summary Text */}
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-lg md:text-xl text-gray-400 leading-relaxed mb-12 max-w-3xl"
+          >
+            Warp-402 is a revolutionary HTTP 402 payment system that enables true cross-chain payments on the Avalanche network. 
+            Built on Avalanche Teleporter's Inter-Chain Messaging (ICM) protocol, it allows you to pay on one subnet and verify 
+            the payment instantly on another—no bridges, no waiting, no complexity.
+          </motion.p>
+
+          {/* Stats Grid */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-3 gap-8 text-left justify-items-start"
+          >
+            <div>
+              <div className="text-3xl md:text-4xl font-bold font-manrope text-red-500 mb-2">
+                5-10s
+              </div>
+              <div className="text-sm md:text-base text-gray-400">
+                payment transfer
+              </div>
+            </div>
+
+            <div>
+              <div className="text-3xl md:text-4xl font-bold font-manrope text-red-500 mb-2">
+                100%
+              </div>
+              <div className="text-sm md:text-base text-gray-400">
+                trustless
+              </div>
+            </div>
+
+            <div>
+              <div className="text-3xl md:text-4xl font-bold font-manrope text-red-500 mb-2">
+                ∞
+              </div>
+              <div className="text-sm md:text-base text-gray-400">
+                Subnet support
+              </div>
+            </div>
+          </motion.div>
       </div>
     </section>
   );

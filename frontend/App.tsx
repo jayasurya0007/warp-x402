@@ -18,12 +18,18 @@ export default function App() {
       <main>
         <Hero />
         <TrustedBy />
-        <HowItWorks />
-        <Architecture />
-        <ProcessSteps />
-        <AgentOS />
-        <SetupGuide />
+        <section id="how-it-works">
+          <HowItWorks />
+        </section>
+        <section id="architecture">
+          <Architecture />
+        </section>
+        
+        <section id="setup-guide">
+          <SetupGuide />
+        </section>
         <FAQ />
+        <AgentOS />
       </main>
       <Footer />
     </div>

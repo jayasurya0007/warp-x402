@@ -15,9 +15,9 @@ const FAQ = () => {
 
   return (
     <section className="py-24 bg-black border-t border-white/10">
-      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-12">
+      <div className="w-full px-6 md:px-12 lg:px-24 grid md:grid-cols-3 gap-12">
         <div>
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">
+          <h2 className="text-4xl md:text-6xl font-bold font-manrope mb-6">
             Frequently <br/> asked <br/> questions
           </h2>
           <a href="https://github.com/jayasurya0007/wrap-x402" target="_blank" className="inline-block bg-brand-orange text-white px-6 py-3 rounded font-bold hover:bg-red-600 transition-colors">
