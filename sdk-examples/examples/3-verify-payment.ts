@@ -18,21 +18,21 @@ async function main() {
       chainId: 1001,
       blockchainId: '0x015c25adff71c05f6ae8fde1e1a621ebf677a6a57b0266257758e1e6eb1572c3',
       messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
-      sender: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922'
+      sender: '0xA4cD3b0Eb6E5Ab5d8CE4065BcCD70040ADAB1F00'
     },
     
     receiverChain: {
-      rpc: 'http://127.0.0.1:9652/ext/bc/2ebnxs92JxZpqhv5wUWZ5TExBVVaUG5xxBjd3wbm6PeuYJ6Un5/rpc',
+      rpc: 'http://127.0.0.1:9650/ext/bc/krncd99BqvSYebiEuZk8NvYNiaS3zWaUtRg2mD3F8hQvroBR8/rpc',
       chainId: 1002,
-      blockchainId: '0xd9123a2d0e43bab99c87ee6a9bca849f161a97cfc66adeeb4b440fd7c906f092',
+      blockchainId: '0x6395f92aaae85f30810132579df9b48133f6d28daf144ab633de2e3477a2f8da',
       messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
-      receiver: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922'
+      receiver: '0x4Ac1d98D9cEF99EC6546dEd4Bd550b0b287aaD6D'
     }
   });
 
   try {
     // Payment ID from example 2
-    const paymentId = process.env.PAYMENT_ID || 'ed66038991af2bff4f081808c991021071a5b1a9790a1c4b757b7e7f907e887b';
+    const paymentId = process.env.PAYMENT_ID || '0x8f17c5a74e3b1c556247d37226ce150fefa666b1a205de63ab8b055b8b108801';
     
     console.log(`Checking payment: ${paymentId}\n`);
 

@@ -2,7 +2,9 @@
 
 import axios from 'axios';
 import { ethers } from 'ethers';
-import { Warp402 } from 'avax-warp-pay';
+import pkg from 'avax-warp-pay';
+console.log('Imported avax-warp-pay:', pkg);
+const { Warp402Factory } = pkg || {};
 import dotenv from 'dotenv';
 import chalk from 'chalk';
 import { setTimeout } from 'timers/promises';
@@ -68,13 +70,13 @@ async function runDemo() {
       }
       
       log.success('Received HTTP 402 Payment Required');
-      paymentDetails = resourceResponse.data.paymentDetails;
+      paymentDetails = resourceResponse.data.payment;
       paymentId = paymentDetails.paymentId;
       
       log.data('Payment ID', paymentId);
-      log.data('Required Amount', `${paymentDetails.priceInEther} tokens (${paymentDetails.price} wei)`);
-      log.data('Payment Chain', `Subnet A (Chain ID: ${paymentDetails.chainId})`);
-      log.data('Receiver Contract', paymentDetails.receiver);
+      log.data('Required Amount', `${paymentDetails.amountFormatted} (${paymentDetails.amount} wei)`);
+      log.data('Payment Chain', `Subnet A (Chain ID: ${paymentDetails.senderChainId})`);
+      log.data('Receiver Contract', paymentDetails.receiverContract);
       
       if (VERBOSE) {
         log.separator();
@@ -105,35 +107,40 @@ async function runDemo() {
     const balance = await provider.getBalance(wallet.address);
     log.data('Balance', `${ethers.formatEther(balance)} tokens`);
     
-    if (balance < BigInt(paymentDetails.price)) {
+    if (balance < BigInt(paymentDetails.amount)) {
       throw new Error('Insufficient balance for payment');
     }
     
     // Send payment using SDK-compatible ABI
     log.info('Sending payment via WarpSender contract...');
-    const warpSenderABI = [
-      'function sendPayment(bytes32 paymentId) payable'
-    ];
-    const warpSender = new ethers.Contract(
-      paymentDetails.sender,
-      warpSenderABI,
-      wallet
-    );
     
-    const tx = await warpSender.sendPayment(paymentId, {
-      value: paymentDetails.price,
-      gasLimit: 200000
+    // Initialize SDK for sending
+    const warp = Warp402Factory.fromExisting({
+      privateKey: PRIVATE_KEY,
+      senderChain: {
+        rpc: SUBNET_A_RPC,
+        sender: paymentDetails.senderContract,
+        chainId: Number(paymentDetails.senderChainId),
+        blockchainId: paymentDetails.senderBlockchainId,
+        messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf'
+      },
+      receiverChain: {
+        rpc: 'http://127.0.0.1:9650/ext/bc/krncd99BqvSYebiEuZk8NvYNiaS3zWaUtRg2mD3F8hQvroBR8/rpc', // Placeholder, not used for sending
+        chainId: 1002,
+        blockchainId: '0x6395f92aaae85f30810132579df9b48133f6d28daf144ab633de2e3477a2f8da',
+        messenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf',
+        receiver: paymentDetails.receiverContract
+      }
     });
-    
-    log.success('Transaction sent!');
-    log.data('Transaction Hash', tx.hash);
-    
-    log.info('Waiting for confirmation...');
-    const receipt = await tx.wait();
+
+    // The SDK's sendPayment() already waits for confirmation and returns a receipt
+    // No need to call .wait() - the SDK does this internally
+    const txReceipt = await warp.sender.sendPayment(paymentId, paymentDetails.amount);
     
     log.success('Payment confirmed on Subnet A');
-    log.data('Block Number', receipt.blockNumber);
-    log.data('Gas Used', receipt.gasUsed.toString());
+    log.data('Transaction Hash', txReceipt.hash);
+    log.data('Block Number', txReceipt.blockNumber);
+    log.data('Gas Used', txReceipt.gasUsed.toString());
     
     if (VERBOSE) {
       log.separator();
@@ -164,7 +171,7 @@ async function runDemo() {
     
     let verificationAttempts = 0;
     let verified = false;
-    const maxAttempts = 3;
+    const maxAttempts = 5;
     
     while (!verified && verificationAttempts < maxAttempts) {
       verificationAttempts++;
@@ -191,7 +198,7 @@ async function runDemo() {
         } else {
           log.info(`Attempt ${verificationAttempts}/${maxAttempts}: Payment not yet delivered`);
           if (verificationAttempts < maxAttempts) {
-            await setTimeout(3000);
+            await setTimeout(5000);
           }
         }
       } catch (error) {

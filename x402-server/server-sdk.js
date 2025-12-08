@@ -18,14 +18,14 @@ dotenv.config();
 const NETWORKS = {
   local: {
     name: 'Local Network',
-    senderRpc: 'http://127.0.0.1:9650/ext/bc/YOUR_SUBNET_A_ID/rpc',
-    receiverRpc: 'http://127.0.0.1:9650/ext/bc/2fEmFBdd2Dfjh6nmrTjGTGNbnCb86moNHvCtrdP5bJxpftSEXA/rpc',
+    senderRpc: 'http://127.0.0.1:9650/ext/bc/bjoxQvUZv6FcN5SyYosFMziVyCcnbRMi2YTr2vX3rFzaYYJn/rpc',
+    receiverRpc: 'http://127.0.0.1:9650/ext/bc/krncd99BqvSYebiEuZk8NvYNiaS3zWaUtRg2mD3F8hQvroBR8/rpc',
     senderChainId: 1001,
     receiverChainId: 1002,
-    senderBlockchainId: '0x' + '1'.repeat(64),
-    receiverBlockchainId: '0x' + '2'.repeat(64),
-    receiverAddress: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922',
-    senderAddress: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922',
+    senderBlockchainId: '0x015c25adff71c05f6ae8fde1e1a621ebf677a6a57b0266257758e1e6eb1572c3',
+    receiverBlockchainId: '0x6395f92aaae85f30810132579df9b48133f6d28daf144ab633de2e3477a2f8da',
+    receiverAddress: '0x4Ac1d98D9cEF99EC6546dEd4Bd550b0b287aaD6D',
+    senderAddress: '0xA4cD3b0Eb6E5Ab5d8CE4065BcCD70040ADAB1F00',
     description: 'Local Avalanche subnet deployment'
   },
   fuji: {
@@ -126,6 +126,8 @@ app.get('/resource', (req, res) => {
       amountFormatted: ethers.formatEther(requiredAmount) + ' AVAX',
       senderChainId: currentNetwork.senderChainId,
       receiverChainId: currentNetwork.receiverChainId,
+      senderBlockchainId: currentNetwork.senderBlockchainId,
+      receiverBlockchainId: currentNetwork.receiverBlockchainId,
       senderContract: currentNetwork.senderAddress,
       receiverContract: currentNetwork.receiverAddress
     },

@@ -16,11 +16,11 @@ const __dirname = dirname(__filename);
 const NETWORKS = {
   local: {
     name: 'Local Network',
-    rpcUrl: 'http://127.0.0.1:9650/ext/bc/2fEmFBdd2Dfjh6nmrTjGTGNbnCb86moNHvCtrdP5bJxpftSEXA/rpc',
+    rpcUrl: 'http://127.0.0.1:9650/ext/bc/krncd99BqvSYebiEuZk8NvYNiaS3zWaUtRg2mD3F8hQvroBR8/rpc',
     chainIdA: '1001',
     chainIdB: '1002',
-    receiverAddress: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922',
-    senderAddress: '0x52C84043CD9c865236f11d9Fc9F56aa003c1f922',
+    receiverAddress: '0x4Ac1d98D9cEF99EC6546dEd4Bd550b0b287aaD6D',
+    senderAddress: '0xA4cD3b0Eb6E5Ab5d8CE4065BcCD70040ADAB1F00',
     description: 'Local Avalanche subnet deployment'
   },
   fuji: {

@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "avax-warp-pay": "^1.0.1",
+    "avax-warp-pay": "file:../wrap402-sdk",
     "axios": "^1.6.2",
     "chalk": "^5.3.0",
     "dotenv": "^16.3.1",
