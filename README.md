@@ -33,8 +33,8 @@ Traditional payment systems are locked to single chains. Warp-402 breaks this ba
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         CLIENT                                   │
-│                                                                  │
+│                         CLIENT                                  │
+│                                                                 │
 │  1. GET /resource  →  Receives 402 + Payment ID                 │
 │  2. Sends payment on Sender Chain (e.g., Fuji C-Chain)          │
 │  3. Teleporter relays receipt to Receiver Chain                 │
@@ -43,24 +43,24 @@ Traditional payment systems are locked to single chains. Warp-402 breaks this ba
 └─────────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│                   CHAIN A (Sender Chain)                         │
-│                                                                  │
-│   WarpSender.sol                                                 │
-│   ├─ sendPayment(paymentId, amount)                            │
-│   ├─ Teleporter.sendCrossChainMessage()                        │
-│   └─ Owner: withdraw(), pause(), setGasLimits()                │
+│                   CHAIN A (Sender Chain)                        │
+│                                                                 │
+│   WarpSender.sol                                                │
+│   ├─ sendPayment(paymentId, amount)                             │
+│   ├─ Teleporter.sendCrossChainMessage()                         │
+│   └─ Owner: withdraw(), pause(), setGasLimits()                 │
 └─────────────────────────────────────────────────────────────────┘
                             ↓ Teleporter Relay
 ┌─────────────────────────────────────────────────────────────────┐
-│                   CHAIN B (Receiver Chain)                       │
-│                                                                  │
-│   WarpReceiver.sol                                               │
+│                   CHAIN B (Receiver Chain)                      │
+│                                                                 │
+│   WarpReceiver.sol                                              │
 │   ├─ receiveTeleporterMessage()                                 │
-│   ├─ hasPaid(paymentId) → bool                                 │
-│   ├─ getReceipt(paymentId) → PaymentReceipt                    │
-│   ├─ consumePayment(paymentId)                                 │
-│   ├─ isExpired(paymentId) → bool                               │
-│   └─ Owner: pause(), setExpiryTime(), setRequiredAmount()      │
+│   ├─ hasPaid(paymentId) → bool                                  │
+│   ├─ getReceipt(paymentId) → PaymentReceipt                     │
+│   ├─ consumePayment(paymentId)                                  │
+│   ├─ isExpired(paymentId) → bool                                │
+│   └─ Owner: pause(), setExpiryTime(), setRequiredAmount()       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

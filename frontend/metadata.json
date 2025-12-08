@@ -1,0 +1,5 @@
+{
+  "name": "Warp-402",
+  "description": "Production-Ready Cross-Chain Payment Receipts on Avalanche. Pay on one subnet, verify on another.",
+  "requestFramePermissions": []
+}
