@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import { ethers } from 'ethers';
-import pkg from 'avax-warp-pay';
+import pkg from '../warp402-sdk/dist';
 console.log('Imported avax-warp-pay:', pkg);
 const { Warp402Factory } = pkg || {};
 import dotenv from 'dotenv';
