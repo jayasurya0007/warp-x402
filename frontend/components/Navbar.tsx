@@ -4,22 +4,22 @@ import { Menu, Github, Package } from 'lucide-react';
 const Navbar = () => {
   return (
     <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] lg:w-[calc(100%-6rem)] border border-white/20 bg-white/10 dark:bg-black/30 backdrop-blur-2xl rounded-2xl shadow-2xl shadow-black/20">
-      <div className="px-6 h-16 flex items-center justify-between">
+      <div className="px-6 h-16 flex items-center justify-between relative">
         <div className="flex items-center gap-2">
           {/* Logo Icon */}
           <img src="/logo-light.svg" alt="Warp-402" className="h-6 w-auto object-contain" />
 
         </div>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300 absolute left-1/2 transform -translate-x-1/2">
+          <a href="#how-it-works" className="hover:text-white transition-colors scroll-smooth">How It Works</a>
           <a href="#architecture" className="hover:text-white transition-colors scroll-smooth">Architecture</a>
-          <a href="#how-it-works" className="hover:text-white transition-colors scroll-smooth">SDK</a>
-          <a href="#setup-guide" className="hover:text-white transition-colors scroll-smooth">Docs</a>
-          <a href="#architecture" className="hover:text-white transition-colors scroll-smooth">Contracts</a>
-          <a href="https://github.com/jayasurya0007/wrap-x402" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
+          <a href="#setup-guide" className="hover:text-white transition-colors scroll-smooth">Setup Guide</a>
+          <a href="#footer" className="hover:text-white transition-colors scroll-smooth">Quick Links</a>
+          <a href="#faq" className="hover:text-white transition-colors scroll-smooth">FAQ</a>
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-right justify-end gap-3">
           <a 
             href="https://github.com/jayasurya0007/wrap-x402" 
             target="_blank" 

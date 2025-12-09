@@ -57,7 +57,7 @@ const Architecture = () => {
             delay={0.2}
             align="left"
           >
-            <div className="flex-1 w-full max-w-xs">
+            <div className="flex-1 w-full max-w-md">
               <TerminalBlock filename="WarpSender.sol" activeLine={0}>
                 <p className="bg-brand-orange/10 -mx-4 px-4 py-1 border-l-2 border-brand-orange text-white">function pay() external payable {'{'}</p>
                 <p className="pl-4 text-gray-400">// 1. Receive Funds</p>
@@ -134,7 +134,7 @@ const Architecture = () => {
               {/* Bottom Text */}
               {/* CHANGED: Removed absolute positioning. Added mt-6 to create physical space below the symbols. */}
               <div className="mt-6 text-center w-full relative z-10">
-                <span className="text-[10px] font-mono font-bold text-gray-600 tracking-[0.2em] opacity-50">AWM + BLS SIGS</span>
+                <span className="text-[15px] font-mono text-gray-500 tracking-[0.2em] opacity-90">AWM + BLS SIGS</span>
               </div>
             </div>
           </LayerCard>
@@ -300,7 +300,7 @@ const TerminalBlock = ({ filename, children }: any) => (
         <div className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
       </div>
     </div>
-    <div className="p-3 font-mono text-[10px] md:text-xs text-gray-300 space-y-1 leading-relaxed overflow-x-auto">
+    <div className="p-3 font-mono text-[10px] md:text-xs text-gray-300 space-y-1 leading-relaxed">
       {children}
     </div>
   </div>

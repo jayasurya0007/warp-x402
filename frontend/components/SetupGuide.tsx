@@ -80,14 +80,72 @@ const STEPS = [
   }
 ];
 
+// Helper function to highlight keywords in code (like VSCode)
+const highlightKeywords = (text: string) => {
+  // Escape HTML first
+  const escapeHtml = (str: string) => {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
+  let result = escapeHtml(text);
+  
+  // Keywords to highlight in red (sorted by length, longest first to avoid partial matches)
+  const keywords = [
+    'avax-warp-pay', 'isValidPayment', 'process.env', 'console.log', 'PRIVATE_KEY',
+    'senderChain', 'receiverChain', 'privateKey', 'paymentId',
+    'Warp402', 'parseEther', 'getReceipt',
+    'ethers', 'warp', 'verify', 'consume', 'isPaid',
+    'pay', 'rpc', 'sender', 'receiver',
+    'new', 'const', 'await', 'async', 'import', 'from', 'export',
+    'npm', 'install', 'node'
+  ];
+
+  // Use a placeholder system to avoid double-highlighting
+  const placeholders: string[] = [];
+  let placeholderIndex = 0;
+  
+  // Replace keywords with placeholders first
+  keywords.forEach(keyword => {
+    const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+    result = result.replace(regex, (match) => {
+      const placeholder = `__PLACEHOLDER_${placeholderIndex++}__`;
+      placeholders.push(`<span class="text-red-500">${match}</span>`);
+      return placeholder;
+    });
+  });
+
+  // Highlight function calls (identifier followed by opening paren) that aren't keywords
+  result = result.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, (match, funcName) => {
+    // Skip if it's a keyword or already a placeholder
+    if (keywords.includes(funcName) || match.includes('__PLACEHOLDER')) {
+      return match;
+    }
+    const placeholder = `__PLACEHOLDER_${placeholderIndex++}__`;
+    placeholders.push(`<span class="text-red-500">${funcName}</span>(`);
+    return placeholder;
+  });
+
+  // Replace placeholders with actual highlighted text
+  placeholders.forEach((highlighted, index) => {
+    result = result.replace(`__PLACEHOLDER_${index}__`, highlighted);
+  });
+
+  return result;
+};
+
 const TerminalWindow = ({ title, children, className = "" }) => (
   <div className={`bg-[#0A0A0A] rounded-xl overflow-hidden border border-white/10 font-mono text-sm shadow-2xl ${className}`}>
     {/* Title Bar */}
     <div className="bg-[#111] px-4 py-2 flex items-center justify-between border-b border-white/5">
       <div className="flex gap-1.5">
-        <div className="w-3 h-3 rounded-full bg-red-500/50" />
-        <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
-        <div className="w-3 h-3 rounded-full bg-green-500/50" />
+      <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
+          <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+          <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
       </div>
       <div className="text-gray-500 text-xs font-mono uppercase tracking-wider flex items-center gap-2">
         <Terminal size={12} />
@@ -130,7 +188,7 @@ const SetupGuide = () => {
         setIsTyping(false);
         clearInterval(interval);
       }
-    }, 400); // Speed of line appearance
+    }, 200); // Speed of line appearance
 
     return () => clearInterval(interval);
   }, [activeStep]);
@@ -235,7 +293,7 @@ const SetupGuide = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="relative h-[700px]"
+              className="relative h-[500px]"
             >
               <TerminalWindow 
                 title={`bash — ${STEPS[activeStep]?.id || 'terminal'}`} 
@@ -255,13 +313,16 @@ const SetupGuide = () => {
                         )}
                         {line.type === 'cmd' && (
                           <div className="flex gap-2 text-white group items-center">
-                            <span className="text-brand-orange select-none">$</span>
-                            <span className="flex-1">{line.text}</span>
+                            <span className="text-red-500 select-none">$</span>
+                            <span 
+                              className="flex-1" 
+                              dangerouslySetInnerHTML={{ __html: highlightKeywords(line.text) }}
+                            />
                             <button
                               onClick={() => handleCopy(line.text)}
                               className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded ml-2"
                             >
-                              {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} className="text-gray-400" />}
+                              {copied ? <Check size={14} className="text-red-500" /> : <Copy size={14} className="text-gray-400" />}
                             </button>
                           </div>
                         )}
@@ -269,10 +330,13 @@ const SetupGuide = () => {
                           <span className="text-gray-400 block pl-4 border-l-2 border-white/10 ml-1">{line.text}</span>
                         )}
                         {line.type === 'success' && (
-                          <span className="text-green-400 block font-semibold">{line.text}</span>
+                          <span className="text-red-500 block font-semibold">{line.text}</span>
                         )}
                         {line.type === 'code' && (
-                          <span className="text-blue-300 font-normal block pl-2">{line.text}</span>
+                          <span 
+                            className="text-white font-normal block pl-2" 
+                            dangerouslySetInnerHTML={{ __html: highlightKeywords(line.text) }}
+                          />
                         )}
                         {line.type === 'break' && <br />}
                       </motion.div>
@@ -280,12 +344,12 @@ const SetupGuide = () => {
                   ))}
                   
                   {isTyping && (
-                    <div className="inline-block w-2 h-4 bg-brand-orange animate-pulse align-middle ml-1" />
+                    <div className="inline-block w-2 h-4 bg-red-500 animate-pulse align-middle ml-1" />
                   )}
                   {!isTyping && displayedLines.length > 0 && (
                     <div className="flex gap-2 mt-4 items-center">
-                      <span className="text-brand-orange">$</span>
-                      <span className="w-2 h-4 bg-gray-500 animate-pulse" />
+                      <span className="text-red-500">$</span>
+                      <span className="w-2 h-4 bg-red-500 animate-pulse" />
                     </div>
                   )}
                 </div>

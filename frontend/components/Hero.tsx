@@ -120,28 +120,48 @@ const Hero = () => {
       <div className="relative z-10 w-full px-6 md:px-12 lg:px-24 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           className="flex flex-col items-center"
         >
-           <span className="text-brand-orange font-mono text-sm tracking-[0.2em] mb-6 inline-block uppercase font-bold px-3 py-1 rounded border border-brand-orange/20 bg-brand-orange/10">
+           <motion.span 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-brand-orange font-mono text-sm tracking-[0.2em] mb-6 inline-block uppercase font-bold px-3 py-1 rounded border border-brand-orange/20 bg-brand-orange/10"
+          >
             HTTP 402 ON AVALANCHE
-          </span>
-          <h1 className="text-5xl md:text-8xl font-bold font-manrope leading-[1.1] mb-8 tracking-tight">
+          </motion.span>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1, duration: 0.8 }}
+            className="text-5xl md:text-8xl font-bold font-manrope leading-[1.1] mb-8 tracking-tight"
+          >
             Warp-402 <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-gray-500">
               Verified Instantly
             </span>
-          </h1>
-          <p className="text-gray-400 text-lg md:text-xl mb-12 leading-relaxed max-w-2xl">
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="text-gray-400 text-lg md:text-xl mb-12 leading-relaxed max-w-2xl"
+          >
             Pay on one subnet, verify on another
-          </p>
+          </motion.p>
           
           {/* Powered By Section */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.5 }}
             className="flex items-center gap-4 mb-10"
           >
             <div className="flex flex-col items-center">
@@ -157,8 +177,9 @@ const Hero = () => {
           {/* New Terminal Component */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4, duration: 0.5 }}
             className="relative group"
           >
             {/* Glow effect */}

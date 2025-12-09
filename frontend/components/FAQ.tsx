@@ -14,20 +14,52 @@ const FAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-24 bg-black border-t border-white/10">
+    <section id="faq" className="py-24 bg-black border-t border-white/10">
       <div className="w-full px-6 md:px-12 lg:px-24 grid md:grid-cols-3 gap-12">
-        <div>
-          <h2 className="text-4xl md:text-6xl font-bold font-manrope mb-6">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1, duration: 0.6 }}
+            className="text-4xl md:text-6xl font-bold font-manrope mb-6"
+          >
             Frequently <br/> asked <br/> questions
-          </h2>
-          <a href="https://github.com/jayasurya0007/wrap-x402" target="_blank" className="inline-block bg-brand-orange text-white px-6 py-3 rounded font-bold hover:bg-red-600 transition-colors">
+          </motion.h2>
+          <motion.a 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            href="https://github.com/jayasurya0007/wrap-x402" 
+            target="_blank" 
+            className="inline-block bg-brand-orange text-white px-6 py-3 rounded font-bold hover:bg-red-600 transition-colors"
+          >
              VIEW ON GITHUB
-          </a>
-        </div>
+          </motion.a>
+        </motion.div>
         
-        <div className="md:col-span-2 space-y-4">
+        <motion.div 
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="md:col-span-2 space-y-4"
+        >
           {faqs.map((faq, idx) => (
-            <div key={idx} className="border-b border-white/10 pb-4">
+            <motion.div 
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1, duration: 0.5 }}
+              className="border-b border-white/10 pb-4"
+            >
               <button 
                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
                 className="w-full flex justify-between items-center text-left py-4 hover:text-brand-orange transition-colors group"
@@ -45,15 +77,15 @@ const FAQ = () => {
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <p className="text-gray-400 pb-4 pr-12">
+                    <p className="font-mono text-gray-400 pb-4 pr-12">
                       {faq.answer}
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

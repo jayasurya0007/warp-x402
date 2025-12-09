@@ -82,8 +82,10 @@ const HowItWorks = () => {
       icon: <Lock size={20} className="text-brand-orange" />,
       terminal: "curl -X GET http://localhost:3000/resource",
       code: `// Server responds with HTTP 402 Payment Required
-import { Warp402 } from 'avax-warp-pay';
+import express from 'express';
 import { ethers } from 'ethers';
+
+const app = express();
 
 app.get('/resource', (req, res) => {
   // Generate unique payment ID
@@ -137,16 +139,20 @@ const warp = new Warp402({
 });
 
 // Get paymentId from HTTP 402 response (from step 1)
-const response = await fetch('http://localhost:3000/resource');
-const { payment } = await response.json();
-const paymentId = payment.paymentId;
+async function sendPayment() {
+  const response = await fetch('http://localhost:3000/resource');
+  const { payment } = await response.json();
+  const paymentId = payment.paymentId;
 
-// Send payment using the paymentId from server
-const amount = ethers.parseEther("1.0");
-await warp.pay(amount, paymentId);
+  // Send payment using the paymentId from server
+  const amount = ethers.parseEther("1.0");
+  await warp.pay(amount, paymentId);
 
-console.log('Payment sent! Payment ID:', paymentId);
-// Payment receipt will be relayed via Teleporter`,
+  console.log('Payment sent! Payment ID:', paymentId);
+  // Payment receipt will be relayed via Teleporter
+}
+
+sendPayment();`,
       fileName: "client.js",
     },
     {
@@ -178,7 +184,10 @@ console.log('Payment sent! Payment ID:', paymentId);
       icon: <Unlock size={20} className="text-green-400" />,
       terminal: "curl -X POST http://localhost:3000/consume/0x1234...5678",
       code: `// Server-side verification and consumption
+import express from 'express';
 import { Warp402 } from 'avax-warp-pay';
+
+const app = express();
 
 const warp = new Warp402({
   privateKey: process.env.SERVER_PRIVATE_KEY,
@@ -216,6 +225,7 @@ app.post('/consume/:paymentId', async (req, res) => {
   await warp.consume(paymentId);
   
   // Return protected resource
+  const protectedResource = { /* your protected data */ };
   return res.json({ 
     success: true,
     data: protectedResource 
@@ -258,15 +268,27 @@ app.post('/consume/:paymentId', async (req, res) => {
               {/* Top Section Wrapper */}
               <div>
                 {/* Category Badge */}
-                <div className="flex items-center gap-2 mb-4">
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="flex items-center gap-2 mb-4"
+                >
                   <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
                   <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">PRODUCT</span>
-                </div>
+                </motion.div>
 
                 {/* Main Heading */}
-                <h2 className="text-4xl md:text-6xl font-bold font-manrope leading-tight mb-6 text-white">
+                <motion.h2 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1, duration: 0.6 }}
+                  className="text-4xl md:text-6xl font-bold font-manrope leading-tight mb-6 text-white"
+                >
                   Cross-chain payments <span className="text-brand-orange">verified instantly</span>
-                </h2>
+                </motion.h2>
 
                 {/* Subtitle - Animated */}
                 <div className="min-h-[80px]">
@@ -386,13 +408,19 @@ app.post('/consume/:paymentId', async (req, res) => {
 
             {/* Right Panel: Code Editor */}
             {/* Height is determined by the CodeEditor component, left panel will stretch to match */}
-            <div className="relative h-full flex items-center">
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="relative h-full flex items-center"
+            >
               <CodeEditor 
                 code={activeStepData.code}
                 fileName={activeStepData.fileName}
                 stepTitle={activeStepData.title}
               />
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -423,22 +451,10 @@ const CodeEditor = ({ code, fileName, stepTitle }: CodeEditorProps) => {
   const syntaxHighlight = (code: string) => {
     const lines = code.split('\n');
     return lines.map((line, idx) => {
-      let highlighted = line;
-      // Simple regex highlighting for demo
-      if (line.trim().startsWith('//')) {
-        highlighted = `<span class="text-gray-500 italic">${line}</span>`;
-      } else {
-        highlighted = highlighted
-            .replace(/"([^"]*)"/g, '<span class="text-green-400">"$1"</span>')
-            .replace(/\b(const|import|from|await|async|if|else|return|new|class|interface|type|export|default)\b/g, '<span class="text-purple-400">$1</span>')
-            .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, '<span class="text-blue-400">$1</span>(')
-            .replace(/\b(\d+\.?\d*)\b/g, '<span class="text-orange-400">$1</span>');
-      }
-      
       return (
         <div key={idx} className="flex hover:bg-white/5 transition-colors">
           <span className="text-gray-700 select-none mr-4 w-8 text-right text-xs pt-0.5">{idx + 1}</span>
-          <span className="flex-1 font-mono text-[13px]" dangerouslySetInnerHTML={{ __html: highlighted || ' ' }} />
+          <span className="flex-1 font-mono text-[13px] text-gray-300 whitespace-pre">{line || ' '}</span>
         </div>
       );
     });
