@@ -255,7 +255,7 @@ console.log("Receiver TX Hash:", result.receiverTxHash);
 
 ### Option 3: Manual Foundry Deployment
 
-**Full deployment guide:** [https://github.com/jayasurya0007/wrap-x402/tree/main/wrapx402](https://github.com/jayasurya0007/wrap-x402/tree/main/wrapx402)
+**Full deployment guide:** [https://github.com/jayasurya0007/warp-x402/tree/main/warpx402](https://github.com/jayasurya0007/warp-x402/tree/main/warpx402)
 
 ---
 
@@ -309,5 +309,6 @@ MIT © 2025 Warp-402 Team
 ## Links
 
 - **NPM:** [https://www.npmjs.com/package/avax-warp-pay](https://www.npmjs.com/package/avax-warp-pay)
-- **GitHub:** [https://github.com/jayasurya0007/wrap-x402](https://github.com/jayasurya0007/wrap-x402)
-- **Contracts:** [/wrapx402/src](https://github.com/jayasurya0007/wrap-x402/tree/main/wrapx402/src)
+- **GitHub:** [https://github.com/jayasurya0007/warp-x402](https://github.com/jayasurya0007/warp-x402)
+- **Demo:** [https://warp-x402.vercel.app/](https://warp-x402.vercel.app/)
+- **Contracts:** [/warpx402/src](https://github.com/jayasurya0007/warp-x402/tree/main/warpx402/src)

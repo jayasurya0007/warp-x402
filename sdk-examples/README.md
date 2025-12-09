@@ -100,5 +100,6 @@ await warp.consume(paymentId);
 ## Learn More
 
 - [NPM Package](https://www.npmjs.com/package/avax-warp-pay)
-- [GitHub Repository](https://github.com/jayasurya0007/wrap-x402)
-- [Documentation](https://github.com/jayasurya0007/wrap-x402/tree/main/wrap402-sdk)
+- [GitHub Repository](https://github.com/jayasurya0007/warp-x402)
+- [Demo](https://warp-x402.vercel.app/)
+- [Documentation](https://github.com/jayasurya0007/warp-x402/tree/main/warp402-sdk)

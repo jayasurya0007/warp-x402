@@ -403,8 +403,8 @@ Contributions welcome! This project is open source under the MIT license.
 ### Development Setup
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/wrap-x402.git
-cd wrap-x402/wrapx402
+git clone https://github.com/jayasurya0007/warp-x402.git
+cd warp-x402/warpx402
 
 # Install dependencies
 forge install

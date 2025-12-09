@@ -115,11 +115,11 @@ await warp.pay(ethers.parseEther("1"));
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/jayasurya0007/wrap-x402.git
-cd wrap-x402
+git clone https://github.com/jayasurya0007/warp-x402.git
+cd warp-x402
 
 # Install contract dependencies
-cd wrapx402
+cd warpx402
 forge install
 
 # Install SDK dependencies
@@ -520,13 +520,14 @@ MIT License - see [LICENSE](LICENSE) file
 ## 📞 Contact
 
 - **GitHub**: [@jayasurya0007](https://github.com/jayasurya0007)
-- **Project**: [wrap-x402](https://github.com/jayasurya0007/wrap-x402)
+- **Project**: [warp-x402](https://github.com/jayasurya0007/warp-x402)
+- **Demo**: [https://warp-x402.vercel.app/](https://warp-x402.vercel.app/)
 
 ---
 
 ## ⚡ Quick Links
 
-- [Deploy Contracts →](wrapx402/README.md)
+- [Deploy Contracts →](warpx402/README.md)
 - [SDK Docs →](warp402-sdk/README.md)
 - [Run Server →](x402-server/README.md)
 - [View Tests →](wrapx402/test/)
